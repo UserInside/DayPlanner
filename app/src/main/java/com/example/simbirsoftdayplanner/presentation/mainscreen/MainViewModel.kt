@@ -2,23 +2,25 @@ package com.example.simbirsoftdayplanner.presentation.mainscreen
 
 import androidx.lifecycle.ViewModel
 import com.example.simbirsoftdayplanner.domain.Task
-import com.example.simbirsoftdayplanner.domain.TaskListRepository
+import com.example.simbirsoftdayplanner.domain.TaskRepository
 
 class MainViewModel(
-    private val repository: TaskListRepository
+    private val repository: TaskRepository
 ) : ViewModel() {
 
+    //livadata polei neskolko
 
-    fun addTask() {
-        repository.addTask()
+
+    fun addTask(task: Task) {
+        repository.addTask(task)
     }
 
-    fun editTask() {
-        repository.editTask()
+    fun editTask(task: Task) {
+        repository.editTask(task)
     }
 
-    fun deleteTask() {
-        repository.deleteTask()
+    fun deleteTask(task: Task) {
+        repository.deleteTask(task.id)
     }
 
     suspend fun getTasksList() : List<Task> {
