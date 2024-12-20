@@ -2,6 +2,7 @@ package com.example.simbirsoftdayplanner.data
 
 import com.example.simbirsoftdayplanner.data.db.TaskEntity
 import com.example.simbirsoftdayplanner.domain.Task
+import java.sql.Timestamp
 
 object DataDomainMapper {
 
@@ -10,8 +11,8 @@ object DataDomainMapper {
             id = taskEntity.id,
             name = taskEntity.name!!,
             description = taskEntity.description!!,
-            startTime = taskEntity.date_start!!,
-            finishTime = taskEntity.date_finish!!,
+            startTime = Timestamp(taskEntity.date_start!!), //todo сделать нормально
+            finishTime = Timestamp(taskEntity.date_finish!!),
         )
     }
 
@@ -19,8 +20,8 @@ object DataDomainMapper {
         return TaskEntity(
             name = task.name,
             description = task.description,
-            date_start = task.startTime,
-            date_finish = task.finishTime,
+            date_start = task.startTime.time,
+            date_finish = task.finishTime.time,
         )
     }
 }

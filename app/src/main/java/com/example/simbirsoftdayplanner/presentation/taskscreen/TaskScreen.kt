@@ -29,17 +29,37 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.simbirsoftdayplanner.domain.Task
 import com.example.simbirsoftdayplanner.presentation.mainscreen.ActionButton
+import com.example.simbirsoftdayplanner.presentation.mainscreen.Screen
 import com.example.simbirsoftdayplanner.presentation.theme.Colors
+import java.sql.Timestamp
 import java.util.Calendar
+
+
+@Composable
+fun TaskScreen(
+    taskId: Int, //нужен ли
+    onNavigate: (Screen) -> Unit,
+    vm: TaskViewModel = hiltViewModel()
+) {
+    TaskView(
+        onNavigate = onNavigate,
+        state = vm.state.value.task,
+    )
+}
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TaskScreen(
-    onSaveClick: () -> Unit,
-    onCancelClick: () -> Unit,
-) {
+fun TaskView(
+    onNavigate: (Screen) -> Unit,
+    state: Task = TaskScreenState(Task.mock()).task,
+    onClick: (TaskScreenEvent) -> Unit = {},
+
+    ) {
 
     Scaffold(
         containerColor = Colors.MainBackground,
@@ -52,8 +72,10 @@ fun TaskScreen(
                     modifier = Modifier.fillMaxSize(),
                     horizontalArrangement = Arrangement.SpaceAround
                 ) {
-                    ActionButton(onClick = { onCancelClick() }, text = "Cancel")
-                    ActionButton(onClick = { onSaveClick() }, text = "Save")
+                    ActionButton(onClick = { onNavigate(Screen.MainScreen) }, text = "Cancel")
+                    ActionButton(onClick = { onClick(TaskScreenEvent.AddTaskEvent())
+                        onNavigate(Screen.MainScreen)}, text = "Save"
+                    )
                 }
             }
         },
@@ -61,19 +83,19 @@ fun TaskScreen(
         Column(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 32.dp)
         ) {
-            OutlinedTextField(name = "Name")
+            OutlinedTextField(name = "Name", state.name, onTextChanged = { onClick(TaskScreenEvent.onNameChanged(it))})
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            OutlinedTextField(name = "Description")
+            OutlinedTextField(name = "Description", state.description, onTextChanged = {onClick(TaskScreenEvent.onDescriptionChanged(it))})
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            val x = timeInputRow(name = "Start TIme")
+            val x = timeInputRow(name = "Start Time", Timestamp(147610000))
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            val y = timeInputRow(name = "Finish TIme")
+            val y = timeInputRow(name = "Finish Time", time = Timestamp(147600000))
 
         }
     }
@@ -82,15 +104,15 @@ fun TaskScreen(
 }
 
 @Composable
-private fun OutlinedTextField(name: String) {
-    var text by remember { mutableStateOf("") }
+private fun OutlinedTextField(name: String, text: String, onTextChanged: (String) -> Unit) {
+    var text by remember { mutableStateOf(text) }
     OutlinedTextField(
         modifier = Modifier.fillMaxWidth(),
         value = text,
         textStyle = TextStyle(
             fontSize = 24.sp
         ),
-        onValueChange = { text = it },
+        onValueChange = {  onTextChanged(it) },
         label = { Text(text = name) },
         colors = OutlinedTextFieldDefaults.colors(
             cursorColor = Colors.Time,
@@ -106,7 +128,7 @@ private fun OutlinedTextField(name: String) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun timeInputRow(name: String): TimePickerState {
+private fun timeInputRow(name: String, time: Timestamp): TimePickerState {
     val currentTime = Calendar.getInstance()
 
     val timePickerState = rememberTimePickerState(
@@ -121,7 +143,7 @@ private fun timeInputRow(name: String): TimePickerState {
     ) {
         Text(
             text = name,
-            fontSize = 12.sp,
+            fontSize = 24.sp,
             color = Colors.chosenDate,
         )
         TimeInput(

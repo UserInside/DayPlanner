@@ -8,12 +8,11 @@ class TaskInteractor(
 ) {
 
     suspend fun getTaskList(): List<Task> {
-
         return repository.getTaskList()
     }
 
-    suspend fun getTask(): Task {
-        return repository.getTask()
+    suspend fun getTask(taskId: Int): Task {
+        return repository.getTaskById(taskId)
     }
 
     fun addTask(task: Task) {

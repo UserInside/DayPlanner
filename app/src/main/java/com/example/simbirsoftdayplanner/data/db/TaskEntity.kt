@@ -3,6 +3,7 @@ package com.example.simbirsoftdayplanner.data.db
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import java.sql.Timestamp
 
 @Entity(tableName = "tasks")
 class TaskEntity(

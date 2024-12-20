@@ -9,10 +9,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.DatePicker
@@ -26,41 +29,78 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.simbirsoftdayplanner.domain.Task
 import com.example.simbirsoftdayplanner.presentation.theme.Colors
 import java.util.Locale
 
 @Composable
 fun MainScreen(
-    onAddClick: () -> Unit,
+    onNavigate: (Screen) -> Unit,
+    vm: MainViewModel = hiltViewModel(),
+) {
+    MainView(
+        onNavigate = onNavigate,
+        state = vm.state,
+    )
+}
+
+@Composable
+fun MainView(
+    onNavigate: (Screen) -> Unit,
+    state: MutableState<MainScreenState>,
+    onEvent: (MainScreenEvent) -> Unit = {},
 ) {
 
+    var bottomBarState by remember { mutableStateOf(BottomBarState.NoLineSelectedState) }
+
     val mockMap = mapOf(
-        Pair(7, Task.mock()),
+        Pair(3, Task.mock()),
+        Pair(8, Task.mock()),
         Pair(11, Task.mock()),
-        Pair(18, Task.mock()),
     )
 
     Scaffold(
         containerColor = Colors.MainBackground,
         floatingActionButton = {
-            FloatingActionButton(
-                containerColor = Colors.chosenDate,
-                contentColor = Colors.MainBackground,
-                content = { Icon(Icons.Filled.Add, contentDescription = "Добавить") },
-                onClick = { onAddClick() },
-            )
+            if (bottomBarState == BottomBarState.NoLineSelectedState) {
+                FloatingActionButton(
+                    containerColor = Colors.chosenDate,
+                    contentColor = Colors.MainBackground,
+                    content = { Icon(Icons.Filled.Add, contentDescription = "Добавить") },
+                    onClick = {
+                        onNavigate(Screen.TaskScreen(2))
+                    },
+                )
+            }
         },
-        floatingActionButtonPosition = FabPosition.EndOverlay
+        floatingActionButtonPosition = FabPosition.End,
+        bottomBar = {
+            when (bottomBarState) {
+                BottomBarState.TaskLineSelectedState -> TaskLineSelectedBottomBar(
+                    onClick = { MainScreenEvent.DeleteTaskEvent()
+                    },
+                    onNavigate = { onNavigate(Screen.TaskScreen(2)) }
+                )
 
+                BottomBarState.EmptyLineSelectedState -> EmptyLineSelectedBottomBar(
+                    onNavigate = { onNavigate(Screen.TaskScreen(2)) }
+                )
 
+                BottomBarState.NoLineSelectedState -> null
+            }
+        }
     ) {
         Column(
             modifier = Modifier
@@ -68,14 +108,17 @@ fun MainScreen(
                 .padding(it)
         ) {
             BestDatePickerEver()
-            DayTable(mockMap)
+
+            DayTable(mockMap, onLineClick = { state ->
+                bottomBarState =
+                    if (bottomBarState == state) BottomBarState.NoLineSelectedState else state
+            })
         }
     }
 }
 
-
 @Composable
-private fun DayTable(taskMap: Map<Int, Task>) {
+private fun DayTable(taskMap: Map<Int, Task>, onLineClick: (BottomBarState) -> Unit) {
     Column(
         modifier = Modifier
             .verticalScroll(rememberScrollState())
@@ -85,22 +128,35 @@ private fun DayTable(taskMap: Map<Int, Task>) {
     ) {
         for (i in 0..23) {
             if (i !in taskMap.keys) {
-                EmptyTableLine(i = i)
+                EmptyTableLine(i = i) {
+                    onLineClick(BottomBarState.EmptyLineSelectedState)
+                }
             } else {
-                TaskTableLine(taskMap[i] ?: Task.mock())
+                TaskTableLine(taskMap[i] ?: Task.mock()) {
+                    onLineClick(BottomBarState.TaskLineSelectedState)
+                }
             }
         }
     }
 }
 
 @Composable
-private fun TaskTableLine(task: Task) {
+private fun TaskTableLine(task: Task, onClick: () -> Unit) {
+
+    var isTaskSelected by remember { mutableStateOf(false) }
+
     Box(
         modifier = Modifier
             .padding(vertical = 2.dp)
             .clip(Shapes().extraSmall)
+            .clickable {
+                isTaskSelected = !isTaskSelected
+                onClick()
+            }
             .fillMaxWidth()
-            .background(Colors.ButtonBackground)
+            .background(
+                if (isTaskSelected) Colors.Time else Colors.ButtonBackground
+            ),
     ) {
         Column(
             modifier = Modifier
@@ -115,21 +171,21 @@ private fun TaskTableLine(task: Task) {
                     modifier = Modifier.padding(2.dp),
                     text = task.name,
                     fontSize = 12.sp,
-                    color = Colors.Text,
+                    color = if (isTaskSelected) Colors.MainBackground else Colors.Text,
 
                     )
                 Text(
                     modifier = Modifier.padding(2.dp),
                     text = "${task.startTime} - ${task.finishTime}",
                     fontSize = 12.sp,
-                    color = Colors.Time,
+                    color = if (isTaskSelected) Colors.MainBackground else Colors.Time,
                 )
             }
             Text(
                 modifier = Modifier.padding(2.dp),
                 text = task.description,
                 fontSize = 8.sp,
-                color = Colors.Text,
+                color = if (isTaskSelected) Colors.MainBackground else Colors.Text,
 
                 )
         }
@@ -137,17 +193,18 @@ private fun TaskTableLine(task: Task) {
 }
 
 @Composable
-private fun EmptyTableLine(i: Int) {
-    val isSelected = remember { mutableStateOf(false) }
+private fun EmptyTableLine(i: Int, onClick: () -> Unit) {
+    var isEmptyLineSelected by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
             .padding(vertical = 2.dp)
             .clip(Shapes().extraSmall)
             .fillMaxWidth()
-            .background(Colors.ButtonBackground)
+            .background(if (isEmptyLineSelected) Colors.Time else Colors.ButtonBackground)
             .clickable {
-                isSelected.value != isSelected.value
+                isEmptyLineSelected = !isEmptyLineSelected
+                onClick()
             }, // add click action,
         contentAlignment = Alignment.CenterEnd,
     ) {
@@ -155,11 +212,51 @@ private fun EmptyTableLine(i: Int) {
             modifier = Modifier.padding(vertical = 2.dp, horizontal = 8.dp),
             text = "$i:00",
             fontSize = 8.sp,
-            color = if (isSelected.value) Colors.chosenDate else Colors.Time,
+            color = if (isEmptyLineSelected) Colors.MainBackground else Colors.Time,
         )
-
     }
 }
+
+@Composable
+private fun EmptyLineSelectedBottomBar(
+    onNavigate: () -> Unit
+) {
+    BottomAppBar(
+        modifier = Modifier.padding(vertical = 0.dp),
+        containerColor = Colors.MainBackground,
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight(),
+            horizontalArrangement = Arrangement.Center,
+        ) {
+            ActionButton(onClick = onNavigate, text = "+ Add")
+        }
+    } //todo snackbar deleted
+}
+
+@Composable
+private fun TaskLineSelectedBottomBar(
+    onNavigate: () -> Unit,
+    onClick: (MainScreenEvent) -> Unit //todo удалить?
+) {
+    BottomAppBar(
+        modifier = Modifier.padding(vertical = 0.dp),
+        containerColor = Colors.MainBackground,
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight(),
+            horizontalArrangement = Arrangement.SpaceAround,
+        ) {
+            ActionButton(onClick = { MainScreenEvent.DeleteTaskEvent() }, text = "Delete")
+            ActionButton(onClick = onNavigate, text = "Edit")  // navigate лушче писать тут или передавать из вне?
+        }
+    } //todo snackbar deleted
+}
+
 
 @Composable
 fun ActionButton(
@@ -167,7 +264,8 @@ fun ActionButton(
     text: String
 ) {
     Button(
-        modifier = Modifier,
+        modifier = Modifier
+            .width(150.dp), //todo поменять на размер бОльшей кнопки
         onClick = { onClick() },
         colors = ButtonColors(
             containerColor = Colors.chosenDate,
@@ -206,4 +304,8 @@ private fun BestDatePickerEver() {
         )
     )
 
+}
+
+enum class BottomBarState {
+    TaskLineSelectedState, EmptyLineSelectedState, NoLineSelectedState
 }

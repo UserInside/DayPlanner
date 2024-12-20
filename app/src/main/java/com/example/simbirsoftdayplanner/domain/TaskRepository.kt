@@ -4,7 +4,7 @@ interface TaskRepository {
 
     suspend fun getTaskList(): List<Task>
 
-    suspend fun getTask(): Task
+    suspend fun getTaskById(taskId: Int): Task
 
     fun addTask(task: Task)
 

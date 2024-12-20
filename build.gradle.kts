@@ -3,5 +3,7 @@ plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.jetbrains.kotlin.android) apply false
     alias(libs.plugins.devtoolsKsp)
+    id("androidx.room") version "2.6.1" apply false
+
 
 }

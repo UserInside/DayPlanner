@@ -6,9 +6,13 @@ import androidx.activity.compose.setContent
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
+import com.example.simbirsoftdayplanner.domain.Task
 import com.example.simbirsoftdayplanner.presentation.taskscreen.TaskScreen
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.serialization.Serializable
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -16,24 +20,31 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val navController = rememberNavController()
-            NavHost(navController = navController, startDestination = MainScreen) {
-                composable<MainScreen> {
-                    MainScreen(onAddClick = {navController.navigate(TaskScreen)}
+            NavHost(navController = navController, startDestination = Screen.MainScreen) {
+                composable<Screen.MainScreen> {
+                    MainScreen(
+                        onNavigate = { navController.navigate(Screen.TaskScreen(2)) },
                     )
                 }
-                composable<TaskScreen> {
+                composable<Screen.TaskScreen> {
+                    val args = it.toRoute<Screen.TaskScreen>()
                     TaskScreen(
-                        onSaveClick = { navController.navigate(MainScreen) },
-                        onCancelClick = { navController.navigate(MainScreen) }
+                        taskId = args.taskId,
+                        onNavigate = { navController.navigate(Screen.MainScreen) },
+
                     )
                 }
             }
         }
     }
+
 }
 
-@Serializable
-object MainScreen
 
-@Serializable
-object TaskScreen
+sealed class Screen {
+    @Serializable
+    object MainScreen: Screen()
+
+    @Serializable
+    data class TaskScreen(val taskId: Int): Screen()
+}

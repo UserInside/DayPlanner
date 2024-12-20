@@ -4,7 +4,7 @@ import com.example.simbirsoftdayplanner.data.db.TaskDao
 import com.example.simbirsoftdayplanner.domain.Task
 import com.example.simbirsoftdayplanner.domain.TaskRepository
 
-class TasksRepositoryImpl(private val taskDao: TaskDao): TaskRepository {
+class TaskRepositoryImpl(private val taskDao: TaskDao) : TaskRepository {
 
     override suspend fun getTaskList(): List<Task> {
         val listToMap = taskDao.getTasksList().value
@@ -15,8 +15,11 @@ class TasksRepositoryImpl(private val taskDao: TaskDao): TaskRepository {
         return tasksList
     }
 
-    override suspend fun getTask(): Task {
-        TODO("Not yet implemented")
+    override suspend fun getTaskById(taskId: Int): Task {
+        val task =
+            DataDomainMapper.mapDataToDomain(taskDao.getTaskById(taskId).value!!) //todo сделать нормально
+
+        return task
     }
 
     override fun addTask(task: Task) {

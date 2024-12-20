@@ -14,7 +14,7 @@ interface TaskDao {
     fun getTasksList(): LiveData<List<TaskEntity>>
 
     @Query("SELECT * FROM tasks WHERE taskId = :taskId")
-    fun getTask(taskId: Int): LiveData<TaskEntity>
+    fun getTaskById(taskId: Int): LiveData<TaskEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun addTask(task: TaskEntity)

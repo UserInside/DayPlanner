@@ -1,29 +1,34 @@
 package com.example.simbirsoftdayplanner.presentation.mainscreen
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.example.simbirsoftdayplanner.domain.Task
 import com.example.simbirsoftdayplanner.domain.TaskRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class MainViewModel(
+@HiltViewModel
+class MainViewModel @Inject constructor(
     private val repository: TaskRepository
 ) : ViewModel() {
 
-    //livadata polei neskolko
+    var state = mutableStateOf(MainScreenState())
 
-
-    fun addTask(task: Task) {
-        repository.addTask(task)
+    fun onEvent(event: MainScreenEvent){
+        when (event) {
+//            is MainScreenEvent.AddTaskEvent -> {
+////                repository.addTask()
+//            }
+//            is MainScreenEvent.EditTaskEvent -> {
+////                repository.editTask()
+//            }
+            is MainScreenEvent.DeleteTaskEvent -> {
+//                repository.deleteTask()
+            }
+        }
     }
 
-    fun editTask(task: Task) {
-        repository.editTask(task)
-    }
-
-    fun deleteTask(task: Task) {
-        repository.deleteTask(task.id)
-    }
-
-    suspend fun getTasksList() : List<Task> {
+    suspend fun getTasksList(): List<Task> {
         return repository.getTaskList()
     }
 }
