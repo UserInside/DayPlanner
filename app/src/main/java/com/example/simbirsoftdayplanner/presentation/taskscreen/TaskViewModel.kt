@@ -5,14 +5,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.simbirsoftdayplanner.domain.Task
 import com.example.simbirsoftdayplanner.domain.TaskRepository
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-@HiltViewModel
-class TaskViewModel @Inject constructor(
+@HiltViewModel(assistedFactory = TaskViewModelFactory::class)
+class TaskViewModel @AssistedInject constructor(
     private val repository: TaskRepository,
-    val taskId: String,
+    @Assisted taskId: String,
 ) : ViewModel() {
 
     var state = mutableStateOf(TaskScreenState(Task.mock()))
@@ -20,7 +23,7 @@ class TaskViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            state.value.task = getTaskById(taskId.)
+            state.value.task = getTaskById(taskId.toInt())
         }
     }
 
@@ -38,4 +41,11 @@ class TaskViewModel @Inject constructor(
     suspend fun getTaskById(taskId: Int): Task {
         return repository.getTaskById(taskId)
     }
+
+
+}
+
+@AssistedFactory
+interface TaskViewModelFactory {
+    fun create(taskId: String): TaskViewModel
 }

@@ -31,6 +31,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.simbirsoftdayplanner.domain.Task
 import com.example.simbirsoftdayplanner.presentation.mainscreen.ActionButton
 import com.example.simbirsoftdayplanner.presentation.mainscreen.Screen
@@ -42,8 +43,11 @@ import java.util.Calendar
 fun TaskScreen(
     taskId: Int, //нужен ли
     onNavigate: (Screen) -> Unit,
-    vm: TaskViewModel = hiltViewModel(key = taskId.toString())
+    vm : TaskViewModel = hiltViewModel<TaskViewModel, TaskViewModelFactory>(
+        creationCallback = { factory -> factory.create(taskId.toString()) }
+    )
 ) {
+
     TaskView(
         onNavigate = onNavigate,
         state = vm.state.value.task,

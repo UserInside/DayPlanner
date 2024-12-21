@@ -16,8 +16,8 @@ class TaskRepositoryImpl(private val taskDao: TaskDao) : TaskRepository {
     }
 
     override suspend fun getTaskById(taskId: Int): Task {
-        val task =
-            DataDomainMapper.mapDataToDomain(taskDao.getTaskById(taskId).value!!) //todo сделать нормально
+        val task = Task.mock()
+//            DataDomainMapper.mapDataToDomain(taskDao.getTaskById(taskId).value!!) //todo сделать нормально/  NPE
 
         return task
     }
