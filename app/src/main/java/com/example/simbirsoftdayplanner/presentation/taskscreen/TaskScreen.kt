@@ -41,16 +41,16 @@ import java.util.Calendar
 
 @Composable
 fun TaskScreen(
-    taskId: Int, //нужен ли
+    taskId: Int,
     onNavigate: (Screen) -> Unit,
-    vm : TaskViewModel = hiltViewModel<TaskViewModel, TaskViewModelFactory>(
-        creationCallback = { factory -> factory.create(taskId.toString()) }
-    )
 ) {
-
+    val viewModel: TaskViewModel = hiltViewModel<TaskViewModel, TaskViewModelFactory>(
+        creationCallback = { factory -> factory.create(taskId) }
+    )
     TaskView(
+        state = viewModel.state,
         onNavigate = onNavigate,
-        state = vm.state.value.task,
+        onEvent = viewModel::onEvent
     )
 }
 
@@ -59,8 +59,8 @@ fun TaskScreen(
 @Composable
 fun TaskView(
     onNavigate: (Screen) -> Unit,
-    state: Task = TaskScreenState(Task.mock()).task,
-    onClick: (TaskScreenEvent) -> Unit = {},
+    state: TaskScreenState,
+    onEvent: (TaskScreenEvent) -> Unit = {},
 
     ) {
 
@@ -76,8 +76,11 @@ fun TaskView(
                     horizontalArrangement = Arrangement.SpaceAround
                 ) {
                     ActionButton(onClick = { onNavigate(Screen.MainScreen) }, text = "Cancel")
-                    ActionButton(onClick = { onClick(TaskScreenEvent.AddTaskEvent())
-                        onNavigate(Screen.MainScreen)}, text = "Save"
+                    ActionButton(
+                        onClick = {
+                            onEvent(TaskScreenEvent.AddTaskEvent())
+                            onNavigate(Screen.MainScreen)
+                        }, text = "Save"
                     )
                 }
             }
@@ -86,11 +89,17 @@ fun TaskView(
         Column(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 32.dp)
         ) {
-            OutlinedTextField(name = "Name", state.name, onTextChanged = { onClick(TaskScreenEvent.onNameChanged(it))})
+            OutlinedTextField(
+                name = "Name",
+                state.name,
+                onTextChanged = { onEvent(TaskScreenEvent.onNameChanged(it)) })
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            OutlinedTextField(name = "Description", state.description, onTextChanged = {onClick(TaskScreenEvent.onDescriptionChanged(it))})
+            OutlinedTextField(
+                name = "Description",
+                state.description,
+                onTextChanged = { onEvent(TaskScreenEvent.onDescriptionChanged(it)) })
 
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -108,14 +117,13 @@ fun TaskView(
 
 @Composable
 private fun OutlinedTextField(name: String, text: String, onTextChanged: (String) -> Unit) {
-    var text by remember { mutableStateOf(text) }
     OutlinedTextField(
         modifier = Modifier.fillMaxWidth(),
         value = text,
         textStyle = TextStyle(
             fontSize = 24.sp
         ),
-        onValueChange = {  onTextChanged(it) },
+        onValueChange = { onTextChanged(it) },
         label = { Text(text = name) },
         colors = OutlinedTextFieldDefaults.colors(
             cursorColor = Colors.Time,

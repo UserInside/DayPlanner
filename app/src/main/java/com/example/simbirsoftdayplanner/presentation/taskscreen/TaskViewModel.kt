@@ -1,6 +1,9 @@
 package com.example.simbirsoftdayplanner.presentation.taskscreen
 
+import android.util.Log
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.simbirsoftdayplanner.domain.Task
@@ -10,42 +13,60 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @HiltViewModel(assistedFactory = TaskViewModelFactory::class)
 class TaskViewModel @AssistedInject constructor(
     private val repository: TaskRepository,
-    @Assisted taskId: String,
+    @Assisted val taskId: Int,
 ) : ViewModel() {
 
-    var state = mutableStateOf(TaskScreenState(Task.mock()))
-        private set
+    var state by mutableStateOf(TaskScreenState.emptyMock()) //todo убрать мок
 
     init {
         viewModelScope.launch {
-            state.value.task = getTaskById(taskId.toInt())
+            state = getTaskById(taskId)
         }
     }
 
     fun onEvent(event: TaskScreenEvent) {
-        val task = Task.mock() //todo mock delete
-
         when (event) {
-            is TaskScreenEvent.AddTaskEvent -> repository.addTask(state.value.task)
-            is TaskScreenEvent.EditTaskEvent -> repository.editTask(state.value.task)
-            is TaskScreenEvent.onNameChanged -> state.value.task.copy(name = event.text)
-            is TaskScreenEvent.onDescriptionChanged -> state.value.task.copy(description = event.text)
+            is TaskScreenEvent.AddTaskEvent -> {
+                val task = Task(
+                    name = state.name,
+                    description = state.description,
+                    startTime = state.startTime,
+                    finishTime = state.finishTime
+                )
+                viewModelScope.launch {
+                    repository.addTask(task)
+                }
+            }
+
+            is TaskScreenEvent.EditTaskEvent -> viewModelScope.launch {
+                repository.editTask(Task.emptyMock())
+            }
+
+            is TaskScreenEvent.onNameChanged -> {
+                state = state.copy(name = event.text)
+                Log.i("TaskVM", "${state}")
+            }
+
+            is TaskScreenEvent.onDescriptionChanged -> state = state.copy(description = event.text)
         }
     }
 
-    suspend fun getTaskById(taskId: Int): Task {
-        return repository.getTaskById(taskId)
+    private suspend fun getTaskById(taskId: Int): TaskScreenState {
+        val task = repository.getTaskById(taskId) ?: Task.emptyMock()
+        return TaskScreenState(
+            name = task.name,
+            description = task.description,
+            startTime = task.startTime,
+            finishTime = task.finishTime,
+        )
     }
-
-
 }
 
 @AssistedFactory
 interface TaskViewModelFactory {
-    fun create(taskId: String): TaskViewModel
+    fun create(taskId: Int): TaskViewModel
 }

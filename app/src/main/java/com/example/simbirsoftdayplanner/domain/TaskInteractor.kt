@@ -1,6 +1,8 @@
 package com.example.simbirsoftdayplanner.domain
 
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 
 class TaskInteractor(
     private val repository: TaskRepository,
@@ -11,20 +13,32 @@ class TaskInteractor(
         return repository.getTaskList()
     }
 
-    suspend fun getTask(taskId: Int): Task {
+    suspend fun getTask(taskId: Int): Task? {
         return repository.getTaskById(taskId)
     }
 
-    fun addTask(task: Task) {
-        repository.addTask(task)
+    suspend fun addTask(task: Task) {
+        coroutineScope {
+            launch(dispatcher) {
+                repository.addTask(task)
+            }
+        }
     }
 
-    fun editTask(task: Task) {
-        repository.editTask(task)
+    suspend fun editTask(task: Task) {
+        coroutineScope {
+            launch(dispatcher) {
+                repository.editTask(task)
+            }
+        }
     }
 
-    fun deleteTask(task: Task) {
-        repository.deleteTask(task.id)
+    suspend fun deleteTask(taskId: Int) {
+        coroutineScope {
+            launch(dispatcher) {
+                repository.deleteTask(taskId)
+            }
+        }
     }
 
 
