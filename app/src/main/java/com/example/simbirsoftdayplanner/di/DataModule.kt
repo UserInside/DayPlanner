@@ -14,7 +14,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object DaoModule {
+object DataModule {
 
     @Provides
     @Singleton
@@ -27,11 +27,4 @@ object DaoModule {
     fun provideTaskDao(tasksRoomDatabase: TasksRoomDatabase): TaskDao {
         return tasksRoomDatabase.taskDao()
     }
-
-    @Provides
-    @Singleton
-    fun provideTaskRepository(taskDao: TaskDao): TaskRepository{
-        return TaskRepositoryImpl(taskDao)
-    }
-
 }

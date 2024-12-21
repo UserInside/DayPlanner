@@ -12,7 +12,7 @@ import javax.inject.Inject
 @HiltViewModel
 class TaskViewModel @Inject constructor(
     private val repository: TaskRepository,
-//    val taskId: Int,
+    val taskId: String,
 ) : ViewModel() {
 
     var state = mutableStateOf(TaskScreenState(Task.mock()))
@@ -20,7 +20,7 @@ class TaskViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-//            state.value.task = getTaskById(taskId)
+            state.value.task = getTaskById(taskId.)
         }
     }
 

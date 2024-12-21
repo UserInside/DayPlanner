@@ -21,6 +21,7 @@ import androidx.compose.material3.TimePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -30,7 +31,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.simbirsoftdayplanner.domain.Task
 import com.example.simbirsoftdayplanner.presentation.mainscreen.ActionButton
 import com.example.simbirsoftdayplanner.presentation.mainscreen.Screen
@@ -38,12 +38,11 @@ import com.example.simbirsoftdayplanner.presentation.theme.Colors
 import java.sql.Timestamp
 import java.util.Calendar
 
-
 @Composable
 fun TaskScreen(
     taskId: Int, //нужен ли
     onNavigate: (Screen) -> Unit,
-    vm: TaskViewModel = hiltViewModel()
+    vm: TaskViewModel = hiltViewModel(key = taskId.toString())
 ) {
     TaskView(
         onNavigate = onNavigate,
