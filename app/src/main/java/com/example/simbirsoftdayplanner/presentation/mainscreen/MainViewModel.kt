@@ -43,7 +43,7 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    suspend fun getTasksListByDate(date: Date): List<Task> {
+    private suspend fun getTasksListByDate(date: Date): List<Task> {
         return taskInteractor.getTaskListByDate(date)
     }
 }

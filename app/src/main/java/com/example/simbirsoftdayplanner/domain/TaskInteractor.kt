@@ -1,13 +1,11 @@
 package com.example.simbirsoftdayplanner.domain
 
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import java.util.Date
 
 class TaskInteractor(
     private val repository: TaskRepository,
-    private val dispatcher: CoroutineDispatcher
 ) {
 
     suspend fun getTaskListByDate(date: Date): List<Task> {
@@ -20,7 +18,7 @@ class TaskInteractor(
 
     suspend fun addTask(task: Task) {
         coroutineScope {
-            launch(dispatcher) {
+            launch {
                 repository.addTask(task)
             }
         }
@@ -28,7 +26,7 @@ class TaskInteractor(
 
     suspend fun editTask(task: Task) {
         coroutineScope {
-            launch(dispatcher) {
+            launch {
                 repository.editTask(task)
             }
         }
@@ -36,7 +34,7 @@ class TaskInteractor(
 
     suspend fun deleteTask(taskId: Int) {
         coroutineScope {
-            launch(dispatcher) {
+            launch {
                 repository.deleteTask(taskId)
             }
         }

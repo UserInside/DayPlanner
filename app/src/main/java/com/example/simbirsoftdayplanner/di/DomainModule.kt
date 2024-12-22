@@ -21,10 +21,7 @@ object DomainModule {
     }
 
     @Provides
-    fun provideTaskInteractor(
-        taskRepository: TaskRepository,
-        dispatcher: CoroutineDispatcher
-    ): TaskInteractor {
-        return TaskInteractor(taskRepository, dispatcher)
+    fun provideTaskInteractor(taskRepository: TaskRepository): TaskInteractor {
+        return TaskInteractor(taskRepository)
     }
 }
