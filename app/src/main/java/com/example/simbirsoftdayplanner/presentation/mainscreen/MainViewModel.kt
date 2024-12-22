@@ -1,13 +1,12 @@
 package com.example.simbirsoftdayplanner.presentation.mainscreen
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.simbirsoftdayplanner.domain.Task
-import com.example.simbirsoftdayplanner.domain.TaskRepository
+import com.example.simbirsoftdayplanner.domain.TaskInteractor
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import java.util.Date
@@ -15,7 +14,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val repository: TaskRepository
+    private val taskInteractor: TaskInteractor,
 ) : ViewModel() {
 
     var state by mutableStateOf(MainScreenState())
@@ -38,13 +37,13 @@ class MainViewModel @Inject constructor(
 
             is MainScreenEvent.DeleteTaskEvent -> {
                 viewModelScope.launch {
-                    repository.deleteTask(state.chosenTaskId)
+                    taskInteractor.deleteTask(state.chosenTaskId)
                 }
             }
         }
     }
 
     suspend fun getTasksListByDate(date: Date): List<Task> {
-        return repository.getTaskListByDate(date)
+        return taskInteractor.getTaskListByDate(date)
     }
 }

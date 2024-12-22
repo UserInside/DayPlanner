@@ -14,7 +14,7 @@ class TaskInteractor(
         return repository.getTaskListByDate(date)
     }
 
-    suspend fun getTask(taskId: Int): Task? {
+    suspend fun getTaskById(taskId: Int): Task? {
         return repository.getTaskById(taskId)
     }
 

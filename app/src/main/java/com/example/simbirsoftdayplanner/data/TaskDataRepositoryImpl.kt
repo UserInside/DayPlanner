@@ -1,6 +1,5 @@
 package com.example.simbirsoftdayplanner.data
 
-import android.util.Log
 import com.example.simbirsoftdayplanner.data.db.TaskDao
 import com.example.simbirsoftdayplanner.domain.Task
 import com.example.simbirsoftdayplanner.domain.TaskRepository
@@ -13,15 +12,13 @@ class TaskRepositoryImpl(private val taskDao: TaskDao) : TaskRepository {
 
 
     override suspend fun getTaskById(taskId: Int): Task {
-        val task =
-            DataDomainMapper.mapDataToDomain(taskDao.getTaskById(taskId))  //todo сделать нормально/  NPE . вроде починил
+        val task = DataDomainMapper.mapDataToDomain(taskDao.getTaskById(taskId))
         return task
     }
 
     override suspend fun addTask(task: Task) {
         val taskEntity = DataDomainMapper.mapDomainToData(task)
         taskDao.addTask(taskEntity)
-        Log.i("TaskDataRepImpl", "addtask proceeded to db")
     }
 
     override suspend fun editTask(task: Task) {

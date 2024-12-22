@@ -1,13 +1,12 @@
 package com.example.simbirsoftdayplanner.presentation.taskscreen
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.simbirsoftdayplanner.domain.Task
-import com.example.simbirsoftdayplanner.domain.TaskRepository
+import com.example.simbirsoftdayplanner.domain.TaskInteractor
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -16,7 +15,7 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel(assistedFactory = TaskViewModelFactory::class)
 class TaskViewModel @AssistedInject constructor(
-    private val repository: TaskRepository,
+    private val taskInteractor: TaskInteractor,
     @Assisted val taskId: Int,
 ) : ViewModel() {
 
@@ -38,25 +37,25 @@ class TaskViewModel @AssistedInject constructor(
                     finishTime = state.finishTime
                 )
                 viewModelScope.launch {
-                    repository.addTask(task)
+                    taskInteractor.addTask(task)
                 }
             }
 
             is TaskScreenEvent.EditTaskEvent -> viewModelScope.launch {
-                repository.editTask(Task.emptyMock())
+                taskInteractor.editTask(Task.emptyMock())
             }
 
             is TaskScreenEvent.onNameChangedEvent -> {
                 state = state.copy(name = event.text)
-                Log.i("TaskVM", "${state}")
             }
 
-            is TaskScreenEvent.onDescriptionChangedEvent -> state = state.copy(description = event.text)
+            is TaskScreenEvent.onDescriptionChangedEvent -> state =
+                state.copy(description = event.text)
         }
     }
 
     private suspend fun getTaskById(taskId: Int): TaskScreenState {
-        val task = repository.getTaskById(taskId) ?: Task.emptyMock()
+        val task = taskInteractor.getTaskById(taskId) ?: Task.emptyMock()
         return TaskScreenState(
             name = task.name,
             description = task.description,
