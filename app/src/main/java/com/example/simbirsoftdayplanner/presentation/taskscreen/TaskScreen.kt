@@ -20,19 +20,12 @@ import androidx.compose.material3.TimePickerDefaults
 import androidx.compose.material3.TimePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.simbirsoftdayplanner.domain.Task
 import com.example.simbirsoftdayplanner.presentation.mainscreen.ActionButton
 import com.example.simbirsoftdayplanner.presentation.mainscreen.Screen
 import com.example.simbirsoftdayplanner.presentation.theme.Colors
@@ -48,8 +41,8 @@ fun TaskScreen(
         creationCallback = { factory -> factory.create(taskId) }
     )
     TaskView(
-        state = viewModel.state,
         onNavigate = onNavigate,
+        state = viewModel.state,
         onEvent = viewModel::onEvent
     )
 }
@@ -92,14 +85,14 @@ fun TaskView(
             OutlinedTextField(
                 name = "Name",
                 state.name,
-                onTextChanged = { onEvent(TaskScreenEvent.onNameChanged(it)) })
+                onTextChanged = { onEvent(TaskScreenEvent.onNameChangedEvent(it)) })
 
             Spacer(modifier = Modifier.height(12.dp))
 
             OutlinedTextField(
                 name = "Description",
                 state.description,
-                onTextChanged = { onEvent(TaskScreenEvent.onDescriptionChanged(it)) })
+                onTextChanged = { onEvent(TaskScreenEvent.onDescriptionChangedEvent(it)) })
 
             Spacer(modifier = Modifier.height(12.dp))
 

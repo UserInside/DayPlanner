@@ -1,5 +1,6 @@
 package com.example.simbirsoftdayplanner.presentation.mainscreen
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -20,7 +21,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDefaults
-import androidx.compose.material3.DatePickerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
@@ -28,8 +28,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,76 +40,69 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.simbirsoftdayplanner.domain.Task
 import com.example.simbirsoftdayplanner.presentation.theme.Colors
-import java.util.Locale
 
 @Composable
 fun MainScreen(
     onNavigate: (Screen) -> Unit,
-    vm: MainViewModel = hiltViewModel(),
 ) {
+    val viewModel = hiltViewModel<MainViewModel>()
     MainView(
-        onNavigate = onNavigate,
-        state = vm.state,
+        onNavigate = onNavigate, state = viewModel.state, onEvent = viewModel::onEvent
     )
 }
 
 @Composable
 fun MainView(
     onNavigate: (Screen) -> Unit,
-    state: MutableState<MainScreenState>,
+    state: MainScreenState,
     onEvent: (MainScreenEvent) -> Unit = {},
 ) {
 
     var bottomBarState by remember { mutableStateOf(BottomBarState.NoLineSelectedState) }
 
-    val mockMap = mapOf(
-        Pair(3, Task.mock()),
-        Pair(8, Task.mock()),
-        Pair(11, Task.mock()),
-    )
+//    val mockMap = mapOf(
+//        Pair(3, Task.mock()),
+//        Pair(8, Task.mock()),
+//        Pair(11, Task.mock()),
+//    )
 
-    Scaffold(
-        containerColor = Colors.MainBackground,
-        floatingActionButton = {
-            if (bottomBarState == BottomBarState.NoLineSelectedState) {
-                FloatingActionButton(
-                    containerColor = Colors.chosenDate,
-                    contentColor = Colors.MainBackground,
-                    content = { Icon(Icons.Filled.Add, contentDescription = "Добавить") },
-                    onClick = {
-                        onNavigate(Screen.TaskScreen(2))
-                    },
-                )
-            }
-        },
-        floatingActionButtonPosition = FabPosition.End,
-        bottomBar = {
-            when (bottomBarState) {
-                BottomBarState.TaskLineSelectedState -> TaskLineSelectedBottomBar(
-                    onClick = { MainScreenEvent.DeleteTaskEvent()
-                    },
-                    onNavigate = { onNavigate(Screen.TaskScreen(2)) }
-                )
-
-                BottomBarState.EmptyLineSelectedState -> EmptyLineSelectedBottomBar(
-                    onNavigate = { onNavigate(Screen.TaskScreen(2)) }
-                )
-
-                BottomBarState.NoLineSelectedState -> null
-            }
+    Scaffold(containerColor = Colors.MainBackground, floatingActionButton = {
+        if (bottomBarState == BottomBarState.NoLineSelectedState) {
+            FloatingActionButton(
+                containerColor = Colors.chosenDate,
+                contentColor = Colors.MainBackground,
+                content = { Icon(Icons.Filled.Add, contentDescription = "Добавить") },
+                onClick = {
+                    onNavigate(Screen.TaskScreen(2))
+                },
+            )
         }
-    ) {
+    }, floatingActionButtonPosition = FabPosition.End, bottomBar = {
+        when (bottomBarState) {
+            BottomBarState.TaskLineSelectedState -> TaskLineSelectedBottomBar(onClick = { MainScreenEvent.DeleteTaskEvent },
+                onNavigate = { onNavigate(Screen.TaskScreen(2)) })
+
+            BottomBarState.EmptyLineSelectedState -> EmptyLineSelectedBottomBar(onNavigate = {
+                onNavigate(
+                    Screen.TaskScreen(2)
+                )
+            })
+
+            BottomBarState.NoLineSelectedState -> null
+        }
+    }) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(it)
         ) {
-            BestDatePickerEver()
+            BestDatePickerEver(
+                onDateSelected = { onEvent(MainScreenEvent.onDateSelectedEvent(it)) }
+            )
 
-            DayTable(mockMap, onLineClick = { state ->
+            DayTable(state.tasksList, onLineClick = { state ->
                 bottomBarState =
                     if (bottomBarState == state) BottomBarState.NoLineSelectedState else state
             })
@@ -118,7 +111,7 @@ fun MainView(
 }
 
 @Composable
-private fun DayTable(taskMap: Map<Int, Task>, onLineClick: (BottomBarState) -> Unit) {
+private fun DayTable(taskList: List<Task>, onLineClick: (BottomBarState) -> Unit) {
     Column(
         modifier = Modifier
             .verticalScroll(rememberScrollState())
@@ -126,13 +119,14 @@ private fun DayTable(taskMap: Map<Int, Task>, onLineClick: (BottomBarState) -> U
             .background(Colors.MainBackground)
             .padding(8.dp)
     ) {
+        val hoursList = taskList.map { it.id }
         for (i in 0..23) {
-            if (i !in taskMap.keys) {
+            if (i !in hoursList) {
                 EmptyTableLine(i = i) {
                     onLineClick(BottomBarState.EmptyLineSelectedState)
                 }
             } else {
-                TaskTableLine(taskMap[i] ?: Task.mock()) {
+                TaskTableLine(task = taskList.find { it.id == i } ?: Task.mock()) {
                     onLineClick(BottomBarState.TaskLineSelectedState)
                 }
             }
@@ -141,7 +135,7 @@ private fun DayTable(taskMap: Map<Int, Task>, onLineClick: (BottomBarState) -> U
 }
 
 @Composable
-private fun TaskTableLine(task: Task, onClick: () -> Unit) {
+private fun TaskTableLine(task: Task, onEvent: (MainScreenEvent) -> Unit) {
 
     var isTaskSelected by remember { mutableStateOf(false) }
 
@@ -151,7 +145,7 @@ private fun TaskTableLine(task: Task, onClick: () -> Unit) {
             .clip(Shapes().extraSmall)
             .clickable {
                 isTaskSelected = !isTaskSelected
-                onClick()
+                onEvent(MainScreenEvent.TaskClickedEvent(task.id))
             }
             .fillMaxWidth()
             .background(
@@ -159,13 +153,10 @@ private fun TaskTableLine(task: Task, onClick: () -> Unit) {
             ),
     ) {
         Column(
-            modifier = Modifier
-                .padding(12.dp)
+            modifier = Modifier.padding(12.dp)
         ) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
                     modifier = Modifier.padding(2.dp),
@@ -238,8 +229,7 @@ private fun EmptyLineSelectedBottomBar(
 
 @Composable
 private fun TaskLineSelectedBottomBar(
-    onNavigate: () -> Unit,
-    onClick: (MainScreenEvent) -> Unit //todo удалить?
+    onNavigate: () -> Unit, onClick: (MainScreenEvent) -> Unit //todo удалить?
 ) {
     BottomAppBar(
         modifier = Modifier.padding(vertical = 0.dp),
@@ -251,8 +241,10 @@ private fun TaskLineSelectedBottomBar(
                 .wrapContentHeight(),
             horizontalArrangement = Arrangement.SpaceAround,
         ) {
-            ActionButton(onClick = { MainScreenEvent.DeleteTaskEvent() }, text = "Delete")
-            ActionButton(onClick = onNavigate, text = "Edit")  // navigate лушче писать тут или передавать из вне?
+            ActionButton(onClick = { MainScreenEvent.DeleteTaskEvent }, text = "Delete")
+            ActionButton(
+                onClick = onNavigate, text = "Edit"
+            )  // navigate лушче писать тут или передавать из вне?
         }
     } //todo snackbar deleted
 }
@@ -260,14 +252,11 @@ private fun TaskLineSelectedBottomBar(
 
 @Composable
 fun ActionButton(
-    onClick: () -> Unit,
-    text: String
+    onClick: () -> Unit, text: String
 ) {
     Button(
-        modifier = Modifier
-            .width(150.dp), //todo поменять на размер бОльшей кнопки
-        onClick = { onClick() },
-        colors = ButtonColors(
+        modifier = Modifier.width(150.dp), //todo поменять на размер бОльшей кнопки
+        onClick = { onClick() }, colors = ButtonColors(
             containerColor = Colors.chosenDate,
             contentColor = Colors.MainBackground,
             disabledContentColor = Colors.MainBackground,
@@ -281,11 +270,14 @@ fun ActionButton(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun BestDatePickerEver() {
+private fun BestDatePickerEver(onDateSelected: (Long) -> Unit) {
+
+    val datePickerState = rememberDatePickerState()
+
     DatePicker(
-        state = DatePickerState(locale = Locale.getDefault()),
-        title = null,
-        headline = null,
+        state = datePickerState,
+        title = {},
+        headline = {},
         showModeToggle = false,
         colors = DatePickerDefaults.colors(
             containerColor = Colors.MainBackground,
@@ -301,8 +293,15 @@ private fun BestDatePickerEver() {
             todayContentColor = Colors.Text,
             todayDateBorderColor = Colors.chosenDate,
             dividerColor = Colors.ButtonBackground,
-        )
+        ),
     )
+
+    datePickerState.selectedDateMillis?.let {
+        onDateSelected(it)
+        Log.i("MVMDate", "${it}")  //todo почему вызывается два раза?
+
+    }
+
 
 }
 

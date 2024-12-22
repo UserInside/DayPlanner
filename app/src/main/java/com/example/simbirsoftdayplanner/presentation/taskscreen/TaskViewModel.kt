@@ -20,7 +20,7 @@ class TaskViewModel @AssistedInject constructor(
     @Assisted val taskId: Int,
 ) : ViewModel() {
 
-    var state by mutableStateOf(TaskScreenState.emptyMock()) //todo убрать мок
+    var state by mutableStateOf(TaskScreenState())
 
     init {
         viewModelScope.launch {
@@ -46,12 +46,12 @@ class TaskViewModel @AssistedInject constructor(
                 repository.editTask(Task.emptyMock())
             }
 
-            is TaskScreenEvent.onNameChanged -> {
+            is TaskScreenEvent.onNameChangedEvent -> {
                 state = state.copy(name = event.text)
                 Log.i("TaskVM", "${state}")
             }
 
-            is TaskScreenEvent.onDescriptionChanged -> state = state.copy(description = event.text)
+            is TaskScreenEvent.onDescriptionChangedEvent -> state = state.copy(description = event.text)
         }
     }
 

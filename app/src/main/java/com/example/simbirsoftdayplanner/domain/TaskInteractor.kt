@@ -3,14 +3,15 @@ package com.example.simbirsoftdayplanner.domain
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import java.util.Date
 
 class TaskInteractor(
     private val repository: TaskRepository,
     private val dispatcher: CoroutineDispatcher
 ) {
 
-    suspend fun getTaskList(): List<Task> {
-        return repository.getTaskList()
+    suspend fun getTaskListByDate(date: Date): List<Task> {
+        return repository.getTaskListByDate(date)
     }
 
     suspend fun getTask(taskId: Int): Task? {

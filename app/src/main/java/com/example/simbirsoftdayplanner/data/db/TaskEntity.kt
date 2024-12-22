@@ -3,10 +3,14 @@ package com.example.simbirsoftdayplanner.data.db
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import java.sql.Timestamp
+import java.sql.Date
 
 @Entity(tableName = "tasks")
 class TaskEntity(
+
+    @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = "taskId")
+    var id: Int = 0,
 
     @ColumnInfo(name = "taskName")
     val name: String? = null,
@@ -19,9 +23,4 @@ class TaskEntity(
 
     @ColumnInfo(name = "dateFinish")
     val date_finish: Long? = null,
-) {
-
-    @PrimaryKey(autoGenerate = true)
-    @ColumnInfo(name = "taskId")
-    var id: Int = 0
-}
+)

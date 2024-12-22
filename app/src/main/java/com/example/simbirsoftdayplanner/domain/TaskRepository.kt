@@ -1,8 +1,10 @@
 package com.example.simbirsoftdayplanner.domain
 
+import java.util.Date
+
 interface TaskRepository {
 
-    suspend fun getTaskList(): List<Task>
+    suspend fun getTaskListByDate(date: Date): List<Task>
 
     suspend fun getTaskById(taskId: Int): Task?
 
