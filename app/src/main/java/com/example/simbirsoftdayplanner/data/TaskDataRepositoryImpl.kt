@@ -3,6 +3,7 @@ package com.example.simbirsoftdayplanner.data
 import android.util.Log
 import com.example.simbirsoftdayplanner.common.Converter
 import com.example.simbirsoftdayplanner.data.db.TaskDao
+import com.example.simbirsoftdayplanner.data.db.TaskEntity
 import com.example.simbirsoftdayplanner.domain.Task
 import com.example.simbirsoftdayplanner.domain.TaskRepository
 import kotlinx.datetime.LocalDate
@@ -31,7 +32,7 @@ class TaskDataRepositoryImpl(private val taskDao: TaskDao) : TaskRepository {
 
     override suspend fun getTaskListByDate(date: LocalDate): List<Task> {
         val dateTime = formatDateToLong(date)
-        val x = taskDao.getTasksListByDate(dateTime)
+        val x = taskDao.getTasksListByDate(date)
         val res = x.map { DataDomainMapper.mapDataToDomain(it) }
         Log.i("TDRI", "input date - $date")
         Log.i("TDRI", "dalee datetime - $dateTime")
@@ -44,10 +45,13 @@ class TaskDataRepositoryImpl(private val taskDao: TaskDao) : TaskRepository {
         taskDao.getTaskById(taskId)?.let { DataDomainMapper.mapDataToDomain(it) }
 
     override suspend fun addTask(task: Task) {
-        val taskEntity = DataDomainMapper.mapDomainToData(task)
-        taskDao.addTask(taskEntity)
-        Log.i("TDRI", "input add task - $task")
-        Log.i("TDRI", "dalee taskEntity - $taskEntity")
+//        val taskEntity = DataDomainMapper.mapDomainToData(task)
+//        taskDao.addTask(taskEntity)
+//        Log.i("TDRI", "input add task - $task")
+//        Log.i("TDRI", "dalee taskEntity - $taskEntity")
+        taskDao.addTask(TaskEntity.mock1())
+        taskDao.addTask(TaskEntity.mock2())
+        taskDao.addTask(TaskEntity.mock3())
 
     }
 

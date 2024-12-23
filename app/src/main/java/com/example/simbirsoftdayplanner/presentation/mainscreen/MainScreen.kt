@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.simbirsoftdayplanner.presentation.theme.Colors
+import com.example.simbirsoftdayplanner.common.ActionButton
 
 @Composable
 fun MainScreen(
@@ -244,25 +245,6 @@ private fun TaskLineSelectedBottomBar(
             )
         }
     } //todo snackbar deleted
-}
-
-
-@Composable
-fun ActionButton(
-    modifier: Modifier,
-    onClick: () -> Unit, text: String
-) {
-    Button(
-        modifier = modifier,
-        onClick = { onClick() }, colors = ButtonColors(
-            containerColor = Colors.Accent,
-            contentColor = Colors.Dark,
-            disabledContentColor = Colors.Dark,
-            disabledContainerColor = Colors.Dark
-        )
-    ) {
-        Text(text, fontSize = 12.sp)
-    }
 }
 
 

@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import javax.inject.Inject
@@ -38,7 +39,6 @@ class MainViewModel @Inject constructor(
         when (event) {
             is MainScreenEvent.OnDateSelectedEvent -> {
                 Log.i("TDRI", "MVM onselectedDate - ${event.date}")
-
 
                 val instant = Instant.fromEpochMilliseconds(event.date)
                 val date: LocalDate = instant.toLocalDateTime(TimeZone.currentSystemDefault()).date
@@ -66,11 +66,12 @@ class MainViewModel @Inject constructor(
     private suspend fun getTasksListByDate(date: LocalDate): List<TaskModel> {
         val taskList = taskInteractor.getTaskListByDate(date)
         val hoursList = taskList.map { it.startTime.hour }
+        Log.i("TLST", "hours list - $hoursList")
 
         val resultList = mutableListOf<TaskModel>()
         for (i in 0..23) {
             if (i !in hoursList) {
-                resultList.add(TaskModel())
+                resultList.add(TaskModel(startTime = LocalTime(i, 0)))
             } else {
                 val task: Task = taskList.find { it.startTime.hour == i } ?: Task()
 
@@ -78,10 +79,11 @@ class MainViewModel @Inject constructor(
                     id = task.id,
                     name = task.name,
                     description = task.description,
-                    startTime = task.startTime.time, //может поставить Int hour ? зачем мне полное время?
+                    startTime = task.startTime.time, //может поставить Int hour ? зачем мне полное время? upd. пока не надо
                     finishTime = task.finishTime.time,
-                    isSelected = true //тут неверно. надо не чтобы каждое задание тру, а только одна из линий по клику.
                         // надо где-то добавить стейт для выделения и видимо по нему ориентироваться
+
+                    // 2. может сделать как-то ограничение чтобы минуты всегда 00 были?
                 )
                 resultList.add(taskModel)
             }
