@@ -1,36 +1,20 @@
 package com.example.simbirsoftdayplanner.presentation.taskscreen
 
 import com.example.simbirsoftdayplanner.domain.Task
-import java.sql.Timestamp
-
+import kotlinx.datetime.LocalTime
 
 sealed class TaskScreenEvent(){
-    class AddTaskEvent(): TaskScreenEvent()
-    class EditTaskEvent(task: Task): TaskScreenEvent()
-    class onNameChangedEvent(val text: String): TaskScreenEvent()
-    class onDescriptionChangedEvent(val text: String): TaskScreenEvent()
+    object AddTaskEvent: TaskScreenEvent()
+    class EditTaskEvent(val task: Task): TaskScreenEvent()
+    class OnNameUpdatedEvent(val text: String): TaskScreenEvent()
+    class OnDescriptionUpdatedEvent(val text: String): TaskScreenEvent()
+    class OnStartTimeUpdatedEvent(val hours: Int, val minutes: Int): TaskScreenEvent()
+    class OnFinishTimeUpdatedEvent(val hours: Int, val minutes: Int): TaskScreenEvent()
 }
 
 data class TaskScreenState(
     val name: String = "",
     val description: String = "",
-    val startTime: Timestamp = Timestamp(0),
-    val finishTime: Timestamp = Timestamp(0),
-)  {  companion object {
-
-//    fun mock() = TaskScreenState(
-////        id = 17,
-//        name = "Mock Task",
-//        description = "Mock task description",
-//        startTime = Timestamp(147600000),
-//        finishTime = Timestamp(147610000),
-//    )
-//
-//    fun emptyMock() = TaskScreenState(
-////        id = 19,
-//        name = "",
-//        description = "",
-//        startTime = Timestamp(0),
-//        finishTime = Timestamp(0),
-//    )
-}}
+    val startTime: LocalTime = LocalTime(0, 0),
+    val finishTime: LocalTime = LocalTime(0, 0),
+)

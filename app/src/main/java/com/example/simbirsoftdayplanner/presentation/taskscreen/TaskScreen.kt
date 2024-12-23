@@ -29,16 +29,17 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.simbirsoftdayplanner.presentation.mainscreen.ActionButton
 import com.example.simbirsoftdayplanner.presentation.mainscreen.Screen
 import com.example.simbirsoftdayplanner.presentation.theme.Colors
-import java.sql.Timestamp
+import kotlinx.datetime.LocalTime
 import java.util.Calendar
 
 @Composable
 fun TaskScreen(
     taskId: Int,
+    selectedDate: Int,
     onNavigate: (Screen) -> Unit,
 ) {
     val viewModel: TaskViewModel = hiltViewModel<TaskViewModel, TaskViewModelFactory>(
-        creationCallback = { factory -> factory.create(taskId) }
+        creationCallback = { factory -> factory.create(taskId, selectedDate) }
     )
     TaskView(
         onNavigate = onNavigate,
@@ -58,20 +59,24 @@ fun TaskView(
     ) {
 
     Scaffold(
-        containerColor = Colors.MainBackground,
-
+        containerColor = Colors.Dark,
         bottomBar = {
             BottomAppBar(
-                containerColor = Colors.MainBackground,
+                containerColor = Colors.Dark,
             ) {
                 Row(
                     modifier = Modifier.fillMaxSize(),
                     horizontalArrangement = Arrangement.SpaceAround
                 ) {
-                    ActionButton(onClick = { onNavigate(Screen.MainScreen) }, text = "Cancel")
                     ActionButton(
+                        modifier = Modifier.weight(1f),
+                        onClick = { onNavigate(Screen.MainScreen) },
+                        text = "Cancel"
+                    )
+                    ActionButton(
+                        modifier = Modifier.weight(1f),
                         onClick = {
-                            onEvent(TaskScreenEvent.AddTaskEvent())
+                            onEvent(TaskScreenEvent.AddTaskEvent)
                             onNavigate(Screen.MainScreen)
                         }, text = "Save"
                     )
@@ -85,27 +90,32 @@ fun TaskView(
             OutlinedTextField(
                 name = "Name",
                 state.name,
-                onTextChanged = { onEvent(TaskScreenEvent.onNameChangedEvent(it)) })
+                onTextChanged = { onEvent(TaskScreenEvent.OnNameUpdatedEvent(it)) })
 
             Spacer(modifier = Modifier.height(12.dp))
 
             OutlinedTextField(
                 name = "Description",
                 state.description,
-                onTextChanged = { onEvent(TaskScreenEvent.onDescriptionChangedEvent(it)) })
+                onTextChanged = { onEvent(TaskScreenEvent.OnDescriptionUpdatedEvent(it)) })
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            val x = timeInputRow(name = "Start Time", Timestamp(147610000))
+            TimeInputRow(
+                name = "Start Time",
+                time = state.startTime,
+                onTimeUpdated = { onEvent(TaskScreenEvent.OnStartTimeUpdatedEvent(it.hour, it.minute)) }
+            )
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            val y = timeInputRow(name = "Finish Time", time = Timestamp(147600000))
-
+            TimeInputRow(
+                name = "Finish Time",
+                time = state.finishTime,
+                onTimeUpdated = { onEvent(TaskScreenEvent.OnFinishTimeUpdatedEvent(it.hour, it.minute)) }
+            )
         }
     }
-
-
 }
 
 @Composable
@@ -119,27 +129,32 @@ private fun OutlinedTextField(name: String, text: String, onTextChanged: (String
         onValueChange = { onTextChanged(it) },
         label = { Text(text = name) },
         colors = OutlinedTextFieldDefaults.colors(
-            cursorColor = Colors.Time,
-            focusedLabelColor = Colors.chosenDate,
-            unfocusedLabelColor = Colors.chosenDate,
-            focusedTextColor = Colors.Text,
-            unfocusedTextColor = Colors.Text,
-            focusedBorderColor = Colors.Time,
-            unfocusedBorderColor = Colors.Time
+            cursorColor = Colors.SemiLight,
+            focusedLabelColor = Colors.Accent,
+            unfocusedLabelColor = Colors.Accent,
+            focusedTextColor = Colors.Light,
+            unfocusedTextColor = Colors.Light,
+            focusedBorderColor = Colors.SemiLight,
+            unfocusedBorderColor = Colors.SemiLight
         )
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun timeInputRow(name: String, time: Timestamp): TimePickerState {
+private fun TimeInputRow(name: String, time: LocalTime, onTimeUpdated: (TimePickerState) -> Unit) {
     val currentTime = Calendar.getInstance()
 
     val timePickerState = rememberTimePickerState(
-        initialHour = currentTime.get(Calendar.HOUR_OF_DAY),
-        initialMinute = currentTime.get(Calendar.MINUTE),
+        initialHour = time.hour ?: currentTime.get(Calendar.HOUR_OF_DAY), //todo убрать?
+        initialMinute = time.minute ?: currentTime.get(Calendar.MINUTE),
         is24Hour = true,
     )
+
+    timePickerState.let {
+        onTimeUpdated(it)
+    }
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -148,17 +163,16 @@ private fun timeInputRow(name: String, time: Timestamp): TimePickerState {
         Text(
             text = name,
             fontSize = 24.sp,
-            color = Colors.chosenDate,
+            color = Colors.Accent,
         )
         TimeInput(
             state = timePickerState,
             colors = TimePickerDefaults.colors(
-                timeSelectorSelectedContainerColor = Colors.Time,
-                timeSelectorUnselectedContainerColor = Colors.ButtonBackground,
-                timeSelectorSelectedContentColor = Colors.chosenDate,
-                timeSelectorUnselectedContentColor = Colors.Time,
+                timeSelectorSelectedContainerColor = Colors.SemiLight,
+                timeSelectorUnselectedContainerColor = Colors.SemiDark,
+                timeSelectorSelectedContentColor = Colors.Accent,
+                timeSelectorUnselectedContentColor = Colors.SemiLight,
             )
         )
     }
-    return timePickerState
 }

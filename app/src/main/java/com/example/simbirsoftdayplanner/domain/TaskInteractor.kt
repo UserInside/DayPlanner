@@ -1,15 +1,13 @@
 package com.example.simbirsoftdayplanner.domain
 
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
-import java.util.Date
+import kotlinx.datetime.LocalDate
 
 class TaskInteractor(
     private val repository: TaskRepository,
 ) {
 
-    suspend fun getTaskListByDate(date: Date): List<Task> {
-        return repository.getTaskListByDate(date)
+    suspend fun getTaskListByDate(localDate: LocalDate): List<Task> {
+        return repository.getTaskListByDate(localDate)
     }
 
     suspend fun getTaskById(taskId: Int): Task? {
@@ -17,27 +15,15 @@ class TaskInteractor(
     }
 
     suspend fun addTask(task: Task) {
-        coroutineScope {
-            launch {
-                repository.addTask(task)
-            }
-        }
+        repository.addTask(task)
     }
 
     suspend fun editTask(task: Task) {
-        coroutineScope {
-            launch {
-                repository.editTask(task)
-            }
-        }
+        repository.editTask(task)
     }
 
     suspend fun deleteTask(taskId: Int) {
-        coroutineScope {
-            launch {
-                repository.deleteTask(taskId)
-            }
-        }
+        repository.deleteTask(taskId)
     }
 
 

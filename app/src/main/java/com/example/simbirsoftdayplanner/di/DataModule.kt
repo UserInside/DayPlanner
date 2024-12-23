@@ -1,10 +1,9 @@
 package com.example.simbirsoftdayplanner.di
 
 import android.content.Context
-import com.example.simbirsoftdayplanner.data.TaskRepositoryImpl
+import androidx.room.Room
 import com.example.simbirsoftdayplanner.data.db.TaskDao
 import com.example.simbirsoftdayplanner.data.db.TasksRoomDatabase
-import com.example.simbirsoftdayplanner.domain.TaskRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -18,9 +17,9 @@ object DataModule {
 
     @Provides
     @Singleton
-    fun provideTaskDatabase(@ApplicationContext context: Context): TasksRoomDatabase {
-        return TasksRoomDatabase.getDatabase(context)
-    }
+    fun provideTaskDatabase(@ApplicationContext context: Context): TasksRoomDatabase =
+        Room.databaseBuilder(context, TasksRoomDatabase::class.java, "tasks_database").build()
+
 
     @Provides
     @Singleton

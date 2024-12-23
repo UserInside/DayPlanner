@@ -90,8 +90,12 @@ dependencies {
     implementation(libs.androidx.runtime.livedata)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
 
+    // Hilt
     implementation(libs.hilt.android)
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+    implementation(libs.androidx.hilt.navigation.compose)
     ksp(libs.hilt.android.compiler)
+
+    implementation(libs.kotlinx.datetime)
+    implementation("com.android.tools:desugar_jdk_libs:1.1.8")
 
 }

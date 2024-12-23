@@ -1,24 +1,54 @@
 package com.example.simbirsoftdayplanner.data
 
+import android.util.Log
+import com.example.simbirsoftdayplanner.common.Converter
 import com.example.simbirsoftdayplanner.data.db.TaskDao
 import com.example.simbirsoftdayplanner.domain.Task
 import com.example.simbirsoftdayplanner.domain.TaskRepository
-import java.util.Date
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.atStartOfDayIn
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 
-class TaskRepositoryImpl(private val taskDao: TaskDao) : TaskRepository {
+class TaskDataRepositoryImpl(private val taskDao: TaskDao) : TaskRepository {
 
-    override suspend fun getTaskListByDate(date: Date): List<Task> =
-        taskDao.getTasksListByDate(date.time).map { DataDomainMapper.mapDataToDomain(it) }
-
-
-    override suspend fun getTaskById(taskId: Int): Task {
-        val task = DataDomainMapper.mapDataToDomain(taskDao.getTaskById(taskId))
-        return task
+    fun formatTimestampToDate(timestamp: Long): String {
+        val dateTime =
+            LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault())
+        val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
+        return dateTime.format(formatter)
     }
+
+    fun formatDateToLong(date: LocalDate): Long {
+        return date.atStartOfDayIn(TimeZone.UTC).epochSeconds // Получаем количество секунд с эпохи Unix (1 января 1970 года)
+    }
+
+    // todo тестировать форматеры . правлиьно ли форматирует
+
+    override suspend fun getTaskListByDate(date: LocalDate): List<Task> {
+        val dateTime = formatDateToLong(date)
+        val x = taskDao.getTasksListByDate(dateTime)
+        val res = x.map { DataDomainMapper.mapDataToDomain(it) }
+        Log.i("TDRI", "input date - $date")
+        Log.i("TDRI", "dalee datetime - $dateTime")
+        Log.i("TDRI", "dalee x - $x")
+        Log.i("TDRI", "list res - $res")
+        return res
+    }
+
+    override suspend fun getTaskById(taskId: Int): Task? =
+        taskDao.getTaskById(taskId)?.let { DataDomainMapper.mapDataToDomain(it) }
 
     override suspend fun addTask(task: Task) {
         val taskEntity = DataDomainMapper.mapDomainToData(task)
         taskDao.addTask(taskEntity)
+        Log.i("TDRI", "input add task - $task")
+        Log.i("TDRI", "dalee taskEntity - $taskEntity")
+
     }
 
     override suspend fun editTask(task: Task) {

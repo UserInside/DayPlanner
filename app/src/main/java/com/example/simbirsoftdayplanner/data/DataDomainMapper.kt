@@ -1,26 +1,26 @@
 package com.example.simbirsoftdayplanner.data
 
+import com.example.simbirsoftdayplanner.common.Converter.convertLocalDateTimeToLong
+import com.example.simbirsoftdayplanner.common.Converter.convertLongToLocalDateTime
 import com.example.simbirsoftdayplanner.data.db.TaskEntity
 import com.example.simbirsoftdayplanner.domain.Task
-import java.sql.Date
-import java.sql.Timestamp
-import java.text.SimpleDateFormat
+import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.LocalTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
+import kotlinx.datetime.toLocalDateTime
 
 object DataDomainMapper {
-//    val simpleDateTime = SimpleDateFormat("dd/MM/yyyy hh:mm:ss")
-//    val simpleDate = SimpleDateFormat("dd/MM/yyyy")
-////    val currentDateTime = simpleDate.format(java.util.Date())
-//    val date = simpleDate.format(java.sql.Date())
 
     fun mapDataToDomain(taskEntity: TaskEntity): Task {
-
-
         return Task(
             id = taskEntity.id,
-            name = taskEntity.name!!,
-            description = taskEntity.description!!,
-            startTime = Timestamp(taskEntity.date_start!!), //todo сделать нормально
-            finishTime = Timestamp(taskEntity.date_finish!!),
+            name = taskEntity.name ?: "",
+            description = taskEntity.description ?: "",
+            startTime = convertLongToLocalDateTime(taskEntity.dateStart!!),   //todo сделать нормально
+            finishTime = convertLongToLocalDateTime(taskEntity.dateFinish!!),
         )
     }
 
@@ -28,8 +28,8 @@ object DataDomainMapper {
         return TaskEntity(
             name = task.name,
             description = task.description,
-            date_start = task.startTime.time,
-            date_finish = task.finishTime.time,
+            dateStart = convertLocalDateTimeToLong(task.startTime),
+            dateFinish = convertLocalDateTimeToLong(task.finishTime),
         )
     }
 }

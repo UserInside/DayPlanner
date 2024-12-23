@@ -1,19 +1,29 @@
 package com.example.simbirsoftdayplanner.presentation.mainscreen
 
-import com.example.simbirsoftdayplanner.domain.Task
-import java.util.Date
+import kotlinx.datetime.LocalTime
 
 
 sealed class MainScreenEvent{
     object DeleteTaskEvent: MainScreenEvent()
-    class TaskClickedEvent(val taskId: Int): MainScreenEvent()
-    class onDateSelectedEvent(val date: Long): MainScreenEvent()
+    class OnTaskSelectedEvent(val taskId: Int): MainScreenEvent()
+    class OnDateSelectedEvent(val date: Long): MainScreenEvent()
 }
 
 data class MainScreenState(
-    val tasksList: List<Task> = listOf(),
-//    val chosenDate: Long = 0,
+    val tasksList: List<TaskModel> = listOf(),
     val chosenTaskId: Int = 0,
+    val selectedDate: Int = 0,
 ) {
+
+}
+
+data class TaskModel(
+    val id: Int = 0,
+    val name: String = "",
+    val description: String = "",
+    val startTime: LocalTime = LocalTime(0, 0),
+    val finishTime: LocalTime = LocalTime(0, 0),
+    val isSelected: Boolean = false,
+){
 
 }
