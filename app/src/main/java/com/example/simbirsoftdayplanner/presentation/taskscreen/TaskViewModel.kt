@@ -8,10 +8,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.simbirsoftdayplanner.domain.Task
 import com.example.simbirsoftdayplanner.domain.TaskInteractor
+import com.example.simbirsoftdayplanner.presentation.ContentState
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
@@ -22,17 +24,36 @@ class TaskViewModel @AssistedInject constructor(
     private val taskInteractor: TaskInteractor,
     @Assisted("p1") val taskId: Int,
     @Assisted("p2") val selectedDate: Int,
+    @Assisted("p3") val selectedHour: Int,
 ) : ViewModel() {
 
     var state by mutableStateOf(TaskScreenState())
 
     init {
-        Log.i("TDRI", "TVM state.startTime - ${state.startTime}")
-        Log.i("TDRI", "TVM taskId - $taskId")
-        Log.i("TDRI", "TVM selectedDate - $selectedDate")
+        fetchData()
+    }
 
-        viewModelScope.launch {
-            state = getTaskById(taskId)
+    private fun fetchData() {
+        if (state.contentState == ContentState.Loading) return
+
+        state = state.copy(contentState = ContentState.Loading)
+
+        if (taskId != 0) {
+            viewModelScope.launch {
+                delay(2000) //просто чтобы посмотреть лоадер
+                val task = getTaskById(taskId)
+                Log.i("TSCR", "task - $task")
+                state = state.copy(
+                    name = task.name,
+                    description = task.description,
+                    startTime = task.startTime,
+                    contentState = ContentState.Done,
+                )
+            }
+        } else {
+            state = state.copy(
+                startTime = LocalTime(selectedHour, 0),
+                contentState = ContentState.Done)
         }
     }
 
@@ -43,7 +64,6 @@ class TaskViewModel @AssistedInject constructor(
                     name = state.name,
                     description = state.description,
                     startTime = state.startTime.atDate(LocalDate.fromEpochDays(selectedDate)), //написать номальную дату
-                    finishTime = state.finishTime.atDate(LocalDate.fromEpochDays(selectedDate)), //написать номальную дату
                 )
                 viewModelScope.launch {
                     taskInteractor.addTask(task)
@@ -62,9 +82,6 @@ class TaskViewModel @AssistedInject constructor(
 
             is TaskScreenEvent.OnStartTimeUpdatedEvent -> state =
                 state.copy(startTime = LocalTime(event.hours, event.minutes))
-
-            is TaskScreenEvent.OnFinishTimeUpdatedEvent -> state =
-                state.copy(finishTime = LocalTime(event.hours, event.minutes))
         }
     }
 
@@ -74,7 +91,6 @@ class TaskViewModel @AssistedInject constructor(
             name = task.name,
             description = task.description,
             startTime = task.startTime.time, //исправить время. может убрать на часы
-            finishTime = task.finishTime.time,
         )
     }
 }
@@ -83,6 +99,7 @@ class TaskViewModel @AssistedInject constructor(
 interface TaskViewModelFactory {
     fun create(
         @Assisted("p1") taskId: Int,
-        @Assisted("p2") selectedDate: Int
+        @Assisted("p2") selectedDate: Int,
+        @Assisted("p3") selectedHourDate: Int,
     ): TaskViewModel
 }

@@ -19,8 +19,7 @@ object DataDomainMapper {
             id = taskEntity.id,
             name = taskEntity.name ?: "",
             description = taskEntity.description ?: "",
-            startTime = convertLongToLocalDateTime(taskEntity.dateStart!!),   //todo сделать нормально
-            finishTime = convertLongToLocalDateTime(taskEntity.dateFinish!!),
+            startTime = convertLongToLocalDateTime(taskEntity.taskStartTime!!),   //todo сделать нормально
         )
     }
 
@@ -28,8 +27,7 @@ object DataDomainMapper {
         return TaskEntity(
             name = task.name,
             description = task.description,
-            dateStart = convertLocalDateTimeToLong(task.startTime),
-            dateFinish = convertLocalDateTimeToLong(task.finishTime),
+            taskStartTime = convertLocalDateTimeToLong(task.startTime),
         )
     }
 }

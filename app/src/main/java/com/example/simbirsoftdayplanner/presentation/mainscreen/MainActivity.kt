@@ -7,11 +7,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.example.simbirsoftdayplanner.presentation.Screen
 import com.example.simbirsoftdayplanner.presentation.taskscreen.TaskScreen
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.datetime.LocalDate
-import kotlinx.serialization.Serializable
-import java.time.LocalDateTime
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -24,8 +22,8 @@ class MainActivity : ComponentActivity() {
             NavHost(navController = navController, startDestination = Screen.MainScreen) {
                 composable<Screen.MainScreen> {
                     MainScreen(
-                        onNavigate = { taskId, selectedDate, ->
-                            navController.navigate(Screen.TaskScreen(taskId, selectedDate,)) },
+                        onNavigate = { taskId, selectedDate, selectedHour ->
+                            navController.navigate(Screen.TaskScreen(taskId, selectedDate, selectedHour)) },
                     )
                 }
                 composable<Screen.TaskScreen> {
@@ -33,6 +31,7 @@ class MainActivity : ComponentActivity() {
                     TaskScreen(
                         taskId = args.taskId,
                         selectedDate = args.selectedDate,
+                        selectedHour = args.selectedHour,
                         onNavigate = { navController.navigate(Screen.MainScreen) },
 
                     )
@@ -40,12 +39,4 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-}
-
-sealed class Screen {
-    @Serializable
-    object MainScreen: Screen()
-
-    @Serializable
-    class TaskScreen(val taskId: Int = 3, val selectedDate: Int = 7): Screen()
 }

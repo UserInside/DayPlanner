@@ -9,35 +9,31 @@ import com.example.simbirsoftdayplanner.domain.TaskRepository
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
+import kotlinx.datetime.toLocalDateTime
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
+import kotlin.time.Duration.Companion.minutes
 
 class TaskDataRepositoryImpl(private val taskDao: TaskDao) : TaskRepository {
 
-    fun formatTimestampToDate(timestamp: Long): String {
-        val dateTime =
-            LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault())
-        val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
-        return dateTime.format(formatter)
-    }
-
     fun formatDateToLong(date: LocalDate): Long {
-        return date.atStartOfDayIn(TimeZone.UTC).epochSeconds // Получаем количество секунд с эпохи Unix (1 января 1970 года)
+        return date.atStartOfDayIn(TimeZone.currentSystemDefault()).toEpochMilliseconds() // todo ыерно ли начлао дня ??
     }
 
     // todo тестировать форматеры . правлиьно ли форматирует
 
     override suspend fun getTaskListByDate(date: LocalDate): List<Task> {
-        val dateTime = formatDateToLong(date)
-        val x = taskDao.getTasksListByDate(date)
+
+        val dateStart = formatDateToLong(date)
+        val dateFinish = formatDateToLong(date).plus(86400000)
+        val x = taskDao.getTasksListByDate(dateStart, dateFinish)
         val res = x.map { DataDomainMapper.mapDataToDomain(it) }
-        Log.i("TDRI", "input date - $date")
-        Log.i("TDRI", "dalee datetime - $dateTime")
-        Log.i("TDRI", "dalee x - $x")
-        Log.i("TDRI", "list res - $res")
+//        Log.i("TDRI", "input date - $date, dateStart - $dateStart, dateFinish - $dateFinish")
+//        Log.i("TDRI", "dalee taskEntityList - $x")
+//        Log.i("TDRI", "result taskList - $res")
         return res
     }
 
@@ -45,13 +41,15 @@ class TaskDataRepositoryImpl(private val taskDao: TaskDao) : TaskRepository {
         taskDao.getTaskById(taskId)?.let { DataDomainMapper.mapDataToDomain(it) }
 
     override suspend fun addTask(task: Task) {
-//        val taskEntity = DataDomainMapper.mapDomainToData(task)
-//        taskDao.addTask(taskEntity)
+        val taskEntity = DataDomainMapper.mapDomainToData(task)
+
 //        Log.i("TDRI", "input add task - $task")
 //        Log.i("TDRI", "dalee taskEntity - $taskEntity")
-        taskDao.addTask(TaskEntity.mock1())
-        taskDao.addTask(TaskEntity.mock2())
-        taskDao.addTask(TaskEntity.mock3())
+        taskDao.addTask(taskEntity)
+
+//        taskDao.addTask(TaskEntity.mock1())
+//        taskDao.addTask(TaskEntity.mock2())
+//        taskDao.addTask(TaskEntity.mock3())
 
     }
 

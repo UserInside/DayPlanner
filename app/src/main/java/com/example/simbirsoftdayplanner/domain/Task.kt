@@ -8,5 +8,4 @@ data class Task(
     val name: String = "",
     val description: String = "",
     val startTime: LocalDateTime = LocalDateTime(0, 1, 1, 0, 0),
-    val finishTime: LocalDateTime = LocalDateTime(0, 1, 1, 0, 0),
 )

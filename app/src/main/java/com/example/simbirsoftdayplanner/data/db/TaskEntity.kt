@@ -17,14 +17,12 @@ class TaskEntity(
     @ColumnInfo(name = "taskDescription")
     val description: String? = null,
 
-    @ColumnInfo(name = "dateStart")
-    val dateStart: Long? = null,
+    @ColumnInfo(name = "taskStartTime")
+    val taskStartTime: Long? = null,
 
-    @ColumnInfo(name = "dateFinish")
-    val dateFinish: Long? = null,
 ) {
     override fun toString(): String {
-        return "id = $id, name = $name, desc = $description, stTime = $dateStart, fnTime = $dateFinish"
+        return "id = $id, name = $name, desc = $description, tas = $taskStartTime"
     }
 
     companion object {
@@ -34,8 +32,7 @@ class TaskEntity(
                 id = 7,
                 name = "box1",
                 description = "dscr2",
-                dateStart = 1734940800000,
-                dateFinish = 1734944400000,
+                taskStartTime = 1734940800000,
             )
         }
 
@@ -44,8 +41,7 @@ class TaskEntity(
                 id = 9,
                 name = "box2",
                 description = "dscr2",
-                dateStart = 1734966000000,
-                dateFinish = 1734969600000,
+                taskStartTime = 1734966000000,
             )
         }
 
@@ -54,8 +50,7 @@ class TaskEntity(
                 id = 13,
                 name = "box3",
                 description = "dscr3",
-                dateStart = 1734980400000,
-                dateFinish = 1734984000000,
+                taskStartTime = 1734980400000,
             )
         }
     }

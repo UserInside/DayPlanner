@@ -16,8 +16,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -44,7 +42,7 @@ import com.example.simbirsoftdayplanner.common.ActionButton
 
 @Composable
 fun MainScreen(
-    onNavigate: (Int, Int) -> Unit,
+    onNavigate: (Int, Int, Int) -> Unit,
 ) {
     val viewModel = hiltViewModel<MainViewModel>()
     MainView(
@@ -54,11 +52,10 @@ fun MainScreen(
 
 @Composable
 fun MainView(
-    toTaskScreen: (Int, Int) -> Unit,
+    toTaskScreen: (Int, Int, Int) -> Unit,
     state: MainScreenState,
     onEvent: (MainScreenEvent) -> Unit = {},
 ) {
-
     var bottomBarState by remember { mutableStateOf(BottomBarState.NoLineSelectedState) }
 
     Scaffold(
@@ -70,7 +67,7 @@ fun MainView(
                     contentColor = Colors.Dark,
                     content = { Icon(Icons.Filled.Add, contentDescription = "Add") },
                     onClick = {
-                        toTaskScreen(state.chosenTaskId, state.selectedDate)
+                        toTaskScreen(state.selectedTaskId, state.selectedDate, state.selectedHour)
                     },
                 )
             }
@@ -78,11 +75,15 @@ fun MainView(
         floatingActionButtonPosition = FabPosition.End,
         bottomBar = {
             when (bottomBarState) {
-                BottomBarState.TaskLineSelectedState -> TaskLineSelectedBottomBar(onClick = { MainScreenEvent.DeleteTaskEvent },
-                    onNavigate = { toTaskScreen(state.chosenTaskId, state.selectedDate) })
+                BottomBarState.TaskLineSelectedState -> TaskLineSelectedBottomBar(
+                    onClick = { MainScreenEvent.DeleteTaskEvent },
+                    onNavigate = {
+                        toTaskScreen(state.selectedTaskId, state.selectedDate, state.selectedHour)
+                    })
 
-                BottomBarState.EmptyLineSelectedState -> EmptyLineSelectedBottomBar(onNavigate = {
-                    toTaskScreen(state.chosenTaskId, state.selectedDate)
+                BottomBarState.EmptyLineSelectedState -> EmptyLineSelectedBottomBar(
+                    onNavigate = {
+                        toTaskScreen(state.selectedTaskId, state.selectedDate, state.selectedHour)
                 })
 
                 BottomBarState.NoLineSelectedState -> null
@@ -93,11 +94,14 @@ fun MainView(
                 .fillMaxSize()
                 .padding(it)
         ) {
-            BestDatePickerEver(
+            DatePicker(
                 onDateSelected = { onEvent(MainScreenEvent.OnDateSelectedEvent(it)) }
             )
 
-            DayTable(state.tasksList, onLineClick = { state ->
+            TasksColumn(
+                taskList = state.tasksList,
+                onEvent = onEvent,
+                onLineClick = { state ->
                 bottomBarState =
                     if (bottomBarState == state) BottomBarState.NoLineSelectedState else state
             })
@@ -106,21 +110,27 @@ fun MainView(
 }
 
 @Composable
-private fun DayTable(taskList: List<TaskModel>, onLineClick: (BottomBarState) -> Unit) {
+private fun TasksColumn(
+    taskList: List<TaskModel>,
+    onEvent: (MainScreenEvent) -> Unit = {},
+    onLineClick: (BottomBarState) -> Unit
+) {
     Column(
         modifier = Modifier
             .verticalScroll(rememberScrollState())
             .fillMaxWidth()
             .background(Colors.Dark)
             .padding(8.dp)
-    ) { //todo test из бд достаем несколько задач и после из вьюмоделе должны получить список из 24 эл с правильными задачами.
-        taskList.forEach {
-            if (it.isSelected) {
-                TaskTableLine(it) {
-                    onLineClick(BottomBarState.TaskLineSelectedState)
-                }
+    ) {
+        taskList.forEach { task ->
+            if (task.id != 0) {
+                TaskTableLine(
+                    task = task,
+                    onClick = {
+                        onEvent(MainScreenEvent.OnTaskLineSelectedEvent(task.id,task.startTime))
+                        onLineClick(BottomBarState.TaskLineSelectedState) })
             } else {
-                EmptyTableLine(it) {
+                EmptyTableLine(task) {
                     onLineClick(BottomBarState.EmptyLineSelectedState)
                 }
             }
@@ -129,17 +139,18 @@ private fun DayTable(taskList: List<TaskModel>, onLineClick: (BottomBarState) ->
 }
 
 @Composable
-private fun TaskTableLine(task: TaskModel, onEvent: (MainScreenEvent) -> Unit) {
-
-    var isTaskSelected by remember { mutableStateOf(false) }
+private fun TaskTableLine(
+    task: TaskModel,
+    onClick: () -> Unit
+) {
+    val isTaskSelected = task.isSelected
 
     Box(
         modifier = Modifier
             .padding(vertical = 2.dp)
             .clip(Shapes().extraSmall)
             .clickable {
-                isTaskSelected = !isTaskSelected
-                onEvent(MainScreenEvent.OnTaskSelectedEvent(task.id))
+                onClick()
             }
             .fillMaxWidth()
             .background(
@@ -161,7 +172,7 @@ private fun TaskTableLine(task: TaskModel, onEvent: (MainScreenEvent) -> Unit) {
                     )
                 Text(
                     modifier = Modifier.padding(2.dp),
-                    text = "${task.startTime} - ${task.finishTime}",
+                    text = "${task.startTime}",
                     fontSize = 12.sp,
                     color = if (isTaskSelected) Colors.Dark else Colors.SemiLight,
                 )
@@ -179,7 +190,6 @@ private fun TaskTableLine(task: TaskModel, onEvent: (MainScreenEvent) -> Unit) {
 
 @Composable
 private fun EmptyTableLine(task: TaskModel, onClick: (MainScreenEvent) -> Unit) {
-    var isEmptyLineSelected by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
@@ -188,8 +198,7 @@ private fun EmptyTableLine(task: TaskModel, onClick: (MainScreenEvent) -> Unit) 
             .fillMaxWidth()
             .background(if (task.isSelected) Colors.SemiLight else Colors.SemiDark)
             .clickable {
-                isEmptyLineSelected = !isEmptyLineSelected
-                onClick(MainScreenEvent.OnTaskSelectedEvent(task.id))
+                onClick(MainScreenEvent.OnEmptyLineSelectedEvent(task.startTime.hour))
             },                                                                             // add click action,
         contentAlignment = Alignment.CenterEnd,
     ) {
@@ -197,7 +206,7 @@ private fun EmptyTableLine(task: TaskModel, onClick: (MainScreenEvent) -> Unit) 
             modifier = Modifier.padding(vertical = 2.dp, horizontal = 8.dp),
             text = "${task.startTime}",
             fontSize = 8.sp,
-            color = if (isEmptyLineSelected) Colors.Dark else Colors.SemiLight,
+            color = if (task.isSelected) Colors.Dark else Colors.SemiLight,
         )
     }
 }
@@ -218,12 +227,12 @@ private fun EmptyLineSelectedBottomBar(
         ) {
             ActionButton(modifier = Modifier.weight(1f), onClick = onNavigate, text = "+ Add")
         }
-    } //todo snackbar deleted
+    }
 }
 
 @Composable
 private fun TaskLineSelectedBottomBar(
-    onNavigate: () -> Unit, onClick: (MainScreenEvent) -> Unit //todo удалить?
+    onNavigate: () -> Unit, onClick: () -> Unit //todo удалить?
 ) {
     BottomAppBar(
         modifier = Modifier.padding(vertical = 0.dp), //todo   удалить
@@ -237,7 +246,7 @@ private fun TaskLineSelectedBottomBar(
         ) {
             ActionButton(
                 modifier = Modifier.weight(1f),
-                onClick = { MainScreenEvent.DeleteTaskEvent },
+                onClick = onClick,
                 text = "Delete"
             )
             ActionButton(
@@ -250,14 +259,14 @@ private fun TaskLineSelectedBottomBar(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun BestDatePickerEver(onDateSelected: (Long) -> Unit) {
+private fun DatePicker(onDateSelected: (Long) -> Unit) {
 
     val datePickerState = rememberDatePickerState()
 
     DatePicker(
         state = datePickerState,
-        title = {},
-        headline = {},
+        title = null,
+        headline = null,
         showModeToggle = false,
         colors = DatePickerDefaults.colors(
             containerColor = Colors.Dark,

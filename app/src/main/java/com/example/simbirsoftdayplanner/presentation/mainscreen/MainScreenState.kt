@@ -5,14 +5,16 @@ import kotlinx.datetime.LocalTime
 
 sealed class MainScreenEvent{
     object DeleteTaskEvent: MainScreenEvent()
-    class OnTaskSelectedEvent(val taskId: Int): MainScreenEvent()
+    class OnTaskLineSelectedEvent(val taskId: Int, val startTime: LocalTime): MainScreenEvent()
+    class OnEmptyLineSelectedEvent(val selectedHour: Int): MainScreenEvent()
     class OnDateSelectedEvent(val date: Long): MainScreenEvent()
 }
 
 data class MainScreenState(
     val tasksList: List<TaskModel> = listOf(),
-    val chosenTaskId: Int = 0,
+    val selectedTaskId: Int = 0,
     val selectedDate: Int = 0,
+    val selectedHour: Int = 0,
 ) {
 
 }
@@ -22,8 +24,7 @@ data class TaskModel(
     val name: String = "",
     val description: String = "",
     val startTime: LocalTime = LocalTime(0, 0),
-    val finishTime: LocalTime = LocalTime(0, 0),
-    val isSelected: Boolean = false,
+    var isSelected: Boolean = false,
 ){
 
 }
