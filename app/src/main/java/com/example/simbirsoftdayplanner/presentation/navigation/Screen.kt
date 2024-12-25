@@ -1,15 +1,15 @@
-package com.example.simbirsoftdayplanner.presentation
+package com.example.simbirsoftdayplanner.presentation.navigation
 
 import kotlinx.serialization.Serializable
 
-sealed class Screen {
+sealed interface Screen {
     @Serializable
-    object MainScreen: Screen()
+    data object MainScreen: Screen
 
     @Serializable
     class TaskScreen(
         val taskId: Int = 0,
         val selectedDate: Int = 0,
         val selectedHour: Int = 0
-    ): Screen()
+    ): Screen
 }

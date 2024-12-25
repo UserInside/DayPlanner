@@ -1,7 +1,6 @@
 package com.example.simbirsoftdayplanner.common
 
 import kotlinx.datetime.Instant
-import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
@@ -18,8 +17,4 @@ object Converter {
     fun convertLocalDateTimeToLong(localDateTime: LocalDateTime): Long {
         return localDateTime.toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()
     }
-
-    fun convertLocalDateToLong(localDate: LocalDate): Long = localDate.toEpochDays().toLong()
-
-//    fun convertLongToLocalDate(long: Long): LocalDate = LocalDate.fromEpochDays(long) //krivoe
 }

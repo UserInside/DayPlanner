@@ -20,9 +20,10 @@ class TaskInteractor(
 
     suspend fun editTask(task: Task) {
         repository.editTask(task)
-    }
+    } //todo доделать или удалить
 
-    suspend fun deleteTask(taskId: Int) {
+
+    suspend fun deleteTaskById(taskId: Int) {
         repository.deleteTask(taskId)
     }
 

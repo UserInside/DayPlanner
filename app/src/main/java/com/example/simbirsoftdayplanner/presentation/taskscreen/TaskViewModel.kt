@@ -1,6 +1,5 @@
 package com.example.simbirsoftdayplanner.presentation.taskscreen
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -42,7 +41,6 @@ class TaskViewModel @AssistedInject constructor(
             viewModelScope.launch {
                 delay(2000) //просто чтобы посмотреть лоадер
                 val task = getTaskById(taskId)
-                Log.i("TSCR", "task - $task")
                 state = state.copy(
                     name = task.name,
                     description = task.description,
@@ -63,16 +61,16 @@ class TaskViewModel @AssistedInject constructor(
                 val task = Task(
                     name = state.name,
                     description = state.description,
-                    startTime = state.startTime.atDate(LocalDate.fromEpochDays(selectedDate)), //написать номальную дату
+                    startTime = state.startTime.atDate(LocalDate.fromEpochDays(selectedDate)),
                 )
                 viewModelScope.launch {
                     taskInteractor.addTask(task)
                 }
             }
 
-            is TaskScreenEvent.EditTaskEvent -> viewModelScope.launch {
-                taskInteractor.editTask(Task())
-            }
+//            is TaskScreenEvent.EditTaskEvent -> viewModelScope.launch {
+//                taskInteractor.editTask(Task())
+//            }
 
             is TaskScreenEvent.OnNameUpdatedEvent ->
                 state = state.copy(name = event.text)
@@ -90,7 +88,7 @@ class TaskViewModel @AssistedInject constructor(
         return TaskScreenState(
             name = task.name,
             description = task.description,
-            startTime = task.startTime.time, //исправить время. может убрать на часы
+            startTime = task.startTime.time,
         )
     }
 }
@@ -100,6 +98,6 @@ interface TaskViewModelFactory {
     fun create(
         @Assisted("p1") taskId: Int,
         @Assisted("p2") selectedDate: Int,
-        @Assisted("p3") selectedHourDate: Int,
+        @Assisted("p3") selectedHour: Int,
     ): TaskViewModel
 }

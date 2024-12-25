@@ -1,7 +1,6 @@
 package com.example.simbirsoftdayplanner.presentation.taskscreen
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,14 +26,11 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.commandiron.compose_loading.InstaSpinner
-import com.example.simbirsoftdayplanner.presentation.Screen
+import com.example.simbirsoftdayplanner.presentation.navigation.Screen
 import com.example.simbirsoftdayplanner.common.ActionButton
 import com.example.simbirsoftdayplanner.common.Loader
 import com.example.simbirsoftdayplanner.presentation.ContentState
 import com.example.simbirsoftdayplanner.presentation.theme.Colors
-import kotlinx.datetime.LocalTime
-import java.util.Calendar
 
 @Composable
 fun TaskScreen(
@@ -46,15 +42,12 @@ fun TaskScreen(
     val viewModel: TaskViewModel = hiltViewModel<TaskViewModel, TaskViewModelFactory>(
         creationCallback = { factory -> factory.create(taskId, selectedDate, selectedHour) }
     )
-    Log.i("TSCR", "hour in 0 - $${viewModel.state.startTime.hour}")
 
     TaskView(
         onNavigate = onNavigate,
         state = viewModel.state,
         onEvent = viewModel::onEvent
     )
-    Log.i("TSCR", "hour in 1 - $${viewModel.state.startTime.hour}")
-
 }
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -66,10 +59,7 @@ fun TaskView(
     onEvent: (TaskScreenEvent) -> Unit = {},
 
     ) {
-    Log.i("TSCR", "hour in 2 - $${state.startTime.hour}")
-
     if (state.contentState == ContentState.Loading) { Loader() }
-
     if (state.contentState == ContentState.Done){
         Scaffold(
             containerColor = Colors.Dark,
@@ -114,9 +104,6 @@ fun TaskView(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-//            Log.i("TSCR", "hour before inputRow - ${state.startTime.hour}")
-                Log.i("TSCR", "hour in 3 - ${state.startTime.hour}")
-
                 TimeInputRow(
                     hour = state.startTime.hour,
                     onTimeUpdated = {
@@ -159,15 +146,13 @@ private fun OutlinedTextField(name: String, text: String, onTextChanged: (String
 @Composable
 private fun TimeInputRow(hour: Int, onTimeUpdated: (TimePickerState) -> Unit) {
 
-    Log.i("TSCR", "hour in TimeInputRow - $hour")
-
     val timePickerState = rememberTimePickerState(
         initialHour = hour,
         initialMinute = 0,
         is24Hour = true,
     )
 
-//    onTimeUpdated(timePickerState)
+    onTimeUpdated(timePickerState)
 
     Row(
         modifier = Modifier.fillMaxWidth(),

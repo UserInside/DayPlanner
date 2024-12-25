@@ -20,7 +20,6 @@ object DataModule {
     fun provideTaskDatabase(@ApplicationContext context: Context): TasksRoomDatabase =
         Room.databaseBuilder(context, TasksRoomDatabase::class.java, "tasks_database").build()
 
-
     @Provides
     @Singleton
     fun provideTaskDao(tasksRoomDatabase: TasksRoomDatabase): TaskDao {
