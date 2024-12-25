@@ -4,7 +4,6 @@ import com.example.simbirsoftdayplanner.common.Converter.convertLocalDateTimeToL
 import com.example.simbirsoftdayplanner.common.Converter.convertLongToLocalDateTime
 import com.example.simbirsoftdayplanner.data.db.TaskEntity
 import com.example.simbirsoftdayplanner.domain.Task
-import kotlinx.datetime.LocalDateTime
 
 fun TaskEntity.mapDataToDomain(): Task {
     return Task(

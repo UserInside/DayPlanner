@@ -1,12 +1,10 @@
 package com.example.simbirsoftdayplanner.presentation.taskscreen
 
-import com.example.simbirsoftdayplanner.domain.Task
 import com.example.simbirsoftdayplanner.presentation.ContentState
 import kotlinx.datetime.LocalTime
 
 sealed class TaskScreenEvent(){
     object AddTaskEvent: TaskScreenEvent()
-//    class EditTaskEvent(val task: Task): TaskScreenEvent()
     class OnNameUpdatedEvent(val text: String): TaskScreenEvent()
     class OnDescriptionUpdatedEvent(val text: String): TaskScreenEvent()
     class OnStartTimeUpdatedEvent(val hours: Int, val minutes: Int): TaskScreenEvent()

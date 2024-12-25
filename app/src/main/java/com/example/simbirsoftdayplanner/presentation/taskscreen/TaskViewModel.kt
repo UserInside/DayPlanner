@@ -39,7 +39,7 @@ class TaskViewModel @AssistedInject constructor(
 
         if (taskId != 0) {
             viewModelScope.launch {
-                delay(2000) //просто чтобы посмотреть лоадер
+                delay(2000) //просто, чтобы посмотреть лоадер
                 val task = getTaskById(taskId)
                 state = state.copy(
                     name = task.name,
@@ -57,29 +57,24 @@ class TaskViewModel @AssistedInject constructor(
 
     fun onEvent(event: TaskScreenEvent) {
         when (event) {
-            is TaskScreenEvent.AddTaskEvent -> {
-                val task = Task(
-                    name = state.name,
-                    description = state.description,
-                    startTime = state.startTime.atDate(LocalDate.fromEpochDays(selectedDate)),
-                )
-                viewModelScope.launch {
-                    taskInteractor.addTask(task)
-                }
-            }
-
-//            is TaskScreenEvent.EditTaskEvent -> viewModelScope.launch {
-//                taskInteractor.editTask(Task())
-//            }
-
+            is TaskScreenEvent.AddTaskEvent -> addTaskEvent()
             is TaskScreenEvent.OnNameUpdatedEvent ->
                 state = state.copy(name = event.text)
-
             is TaskScreenEvent.OnDescriptionUpdatedEvent -> state =
                 state.copy(description = event.text)
-
             is TaskScreenEvent.OnStartTimeUpdatedEvent -> state =
                 state.copy(startTime = LocalTime(event.hours, event.minutes))
+        }
+    }
+
+    private fun addTaskEvent() {
+        val task = Task(
+            name = state.name,
+            description = state.description,
+            startTime = state.startTime.atDate(LocalDate.fromEpochDays(selectedDate)),
+        )
+        viewModelScope.launch {
+            taskInteractor.addTask(task)
         }
     }
 

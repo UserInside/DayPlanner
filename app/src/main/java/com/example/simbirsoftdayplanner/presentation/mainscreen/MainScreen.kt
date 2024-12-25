@@ -181,7 +181,6 @@ private fun TaskTableLine(
                 text = task.description,
                 fontSize = 8.sp,
                 color = if (isTaskSelected) Colors.Dark else Colors.Light,
-
                 )
         }
     }
@@ -200,7 +199,7 @@ private fun EmptyTableLine(task: TaskModel, onClick: () -> Unit) {
             .background(if (isLineSelected) Colors.SemiLight else Colors.SemiDark)
             .clickable {
                 onClick()
-            },                                                                             // add click action,
+            },
         contentAlignment = Alignment.CenterEnd,
     ) {
         Text(

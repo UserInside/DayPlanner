@@ -26,10 +26,6 @@ class TaskDataRepositoryImpl(private val taskDao: TaskDao) : TaskRepository {
         taskDao.addTask(taskEntity)
     }
 
-    override suspend fun editTask(task: Task) {
-        taskDao.editTask(task.mapDomainToData())
-    }
-
     override suspend fun deleteTask(taskId: Int) {
         taskDao.deleteTaskById(taskId)
     }

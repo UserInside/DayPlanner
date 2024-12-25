@@ -96,7 +96,7 @@ dependencies {
     ksp(libs.hilt.android.compiler)
 
     implementation(libs.kotlinx.datetime)
-    implementation("com.android.tools:desugar_jdk_libs:1.1.8")
-    implementation("com.github.commandiron:ComposeLoading:1.0.4")
+    implementation(libs.desugar.jdk.libs)
+    implementation(libs.composeloading)
 
 }

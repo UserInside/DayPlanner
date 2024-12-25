@@ -1,6 +1,5 @@
 package com.example.simbirsoftdayplanner.presentation.mainscreen
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -36,7 +35,7 @@ class MainViewModel @Inject constructor(
 
         state = state.copy(contentState = ContentState.Loading)
         viewModelScope.launch {
-            delay(1000) //просто чтобы посмотреть лоадер
+            delay(1000) //просто, чтобы посмотреть лоадер
             val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
             state = state.copy(
                 tasksList = getTasksListByDate(today),
